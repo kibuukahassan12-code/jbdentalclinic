@@ -59,6 +59,10 @@ app.get('/api/health', (req, res) => {
   res.json({ ok: true });
 });
 
+app.get('/health', (req, res) => {
+  res.status(200).send('OK');
+});
+
 if (isProd) {
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = path.dirname(__filename);
@@ -83,15 +87,6 @@ cron.schedule(cronSchedule, async () => {
   }
 }, { timezone: process.env.TZ || 'Africa/Kampala' });
 
-const server = app.listen(PORT, '0.0.0.0', () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
-});
-
-server.on('error', (err) => {
-  if (err.code === 'EADDRINUSE') {
-    console.error(`Port ${PORT} is already in use. Close the other process, or set PORT in .env`);
-  } else {
-    console.error(err);
-  }
-  process.exit(1);
 });
