@@ -1,6 +1,8 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { initDb } from './db.js';
 import { requireApiKey } from './middleware/auth.js';
 import { loginLimiter, apiLimiter } from './middleware/rate-limit.js';
@@ -24,7 +26,7 @@ import cron from 'node-cron';
 initDb();
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3000;
 const isProd = process.env.NODE_ENV === 'production';
 
 app.use(express.json({ limit: '1mb' }));
@@ -57,6 +59,17 @@ app.get('/api/health', (req, res) => {
   res.json({ ok: true });
 });
 
+if (isProd) {
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
+  const distPath = path.resolve(__dirname, '../dist');
+
+  app.use(express.static(distPath));
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(distPath, 'index.html'));
+  });
+}
+
 // Run reminder checks every 30 minutes for timely delivery
 // This includes: thank you messages, 1-day, 6-hour, and 1-hour reminders
 const cronSchedule = process.env.REMINDER_CRON || '*/30 * * * *';
@@ -70,7 +83,7 @@ cron.schedule(cronSchedule, async () => {
   }
 }, { timezone: process.env.TZ || 'Africa/Kampala' });
 
-const server = app.listen(PORT, () => {
+const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
 });
 
