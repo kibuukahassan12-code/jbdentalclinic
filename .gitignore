@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+
+# Environment and secrets
+.env
+.env.local
+.env.*.local
+
+# Backend data (SQLite)
+data/
+
+# Build
+dist/
+build/
+
+# Logs and OS
+*.log
+.DS_Store
+Thumbs.db
