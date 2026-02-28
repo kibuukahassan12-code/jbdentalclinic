@@ -59,6 +59,16 @@ function runExtensionMigrations(database) {
     addMigration('appointments_extra_columns');
   }
 
+  if (!hasMigration('appointments_email_reminders')) {
+    const info = database.prepare('PRAGMA table_info(appointments)').all();
+    const hasCol = (name) => info.some((c) => c.name === name);
+    if (!hasCol('thank_you_email_sent_at')) database.exec("ALTER TABLE appointments ADD COLUMN thank_you_email_sent_at TEXT");
+    if (!hasCol('reminder_1day_email_sent_at')) database.exec("ALTER TABLE appointments ADD COLUMN reminder_1day_email_sent_at TEXT");
+    if (!hasCol('reminder_6h_email_sent_at')) database.exec("ALTER TABLE appointments ADD COLUMN reminder_6h_email_sent_at TEXT");
+    if (!hasCol('reminder_1h_email_sent_at')) database.exec("ALTER TABLE appointments ADD COLUMN reminder_1h_email_sent_at TEXT");
+    addMigration('appointments_email_reminders');
+  }
+
   // Phase 2: Treatment plans (before treatments, FK from treatments)
   if (!hasMigration('treatment_plans')) {
     database.exec(`
