@@ -23,6 +23,7 @@ import patientReports from './routes/patient-reports.js';
 import adminAuth from './routes/admin-auth.js';
 import seed from './routes/seed.js';
 import cron from 'node-cron';
+import { ensureAdmin } from './scripts/ensureAdmin.js';
 
 initDb();
 
@@ -94,8 +95,14 @@ function startReminderService() {
   }, { timezone: process.env.TZ || 'Africa/Kampala' });
 }
 
-app.listen(PORT, '0.0.0.0', () => {
+app.listen(PORT, '0.0.0.0', async () => {
   console.log(`Server running on port ${PORT}`);
+
+  try {
+    await ensureAdmin();
+  } catch (e) {
+    console.error('Admin seed error:', e);
+  }
 
   setTimeout(() => {
     startReminderService();

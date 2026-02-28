@@ -1,40 +1,45 @@
 import { Router } from 'express';
 import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
+import { getDb } from '../db.js';
+import { JWT_SECRET, JWT_EXPIRY } from '../config/admin.js';
 
 const router = Router();
 
-const JWT_SECRET = process.env.ADMIN_API_KEY || 'fallback-secret-change-me';
-const JWT_EXPIRY = '8h';
-
 /**
- * Admin login: username + password from env.
+ * Admin login: email + bcrypt-hashed password from users table.
  * On success returns a signed JWT token for subsequent API calls.
- * Set ADMIN_USERNAME, ADMIN_PASSWORD, ADMIN_API_KEY in .env
  */
-router.post('/login', (req, res) => {
-  const username = process.env.ADMIN_USERNAME;
-  const password = process.env.ADMIN_PASSWORD;
+router.post('/login', async (req, res) => {
+  try {
+    const { email, password } = req.body || {};
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password are required' });
+    }
 
-  if (!username || !password) {
-    return res.status(503).json({ error: 'Admin login not configured' });
+    const db = getDb();
+    const user = db.prepare('SELECT * FROM users WHERE email = ?').get(String(email).trim().toLowerCase());
+
+    if (!user) {
+      return res.status(401).json({ error: 'Invalid email or password' });
+    }
+
+    const valid = await bcrypt.compare(String(password), user.password);
+    if (!valid) {
+      return res.status(401).json({ error: 'Invalid email or password' });
+    }
+
+    const token = jwt.sign(
+      { sub: user.email, role: user.role, userId: user.id },
+      JWT_SECRET,
+      { expiresIn: JWT_EXPIRY }
+    );
+
+    res.json({ success: true, token, expiresIn: JWT_EXPIRY });
+  } catch (err) {
+    console.error('Login error:', err);
+    res.status(500).json({ error: 'Internal server error' });
   }
-
-  const { username: u, password: p } = req.body || {};
-  if (!u || !p) {
-    return res.status(400).json({ error: 'Username and password are required' });
-  }
-
-  if (String(u).trim() !== username || String(p) !== password) {
-    return res.status(401).json({ error: 'Invalid username or password' });
-  }
-
-  const token = jwt.sign(
-    { sub: username, role: 'admin' },
-    JWT_SECRET,
-    { expiresIn: JWT_EXPIRY }
-  );
-
-  res.json({ success: true, token, expiresIn: JWT_EXPIRY });
 });
 
 export default router;

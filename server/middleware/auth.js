@@ -1,6 +1,5 @@
 import jwt from 'jsonwebtoken';
-
-const JWT_SECRET = process.env.ADMIN_API_KEY || 'fallback-secret-change-me';
+import { JWT_SECRET } from '../config/admin.js';
 
 export function requireApiKey(req, res, next) {
   const provided =

@@ -64,14 +64,14 @@ const TABS = [
 ];
 
 const LoginForm = ({ error, loading, onLogin }) => {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!username.trim() || !password.trim()) return;
-    await onLogin(username.trim(), password);
+    if (!email.trim() || !password.trim()) return;
+    await onLogin(email.trim(), password);
   };
 
   return (
@@ -105,16 +105,16 @@ const LoginForm = ({ error, loading, onLogin }) => {
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label htmlFor="admin-username" className="block text-sm font-medium text-gray-300 mb-1.5">
-                  Username
+                <label htmlFor="admin-email" className="block text-sm font-medium text-gray-300 mb-1.5">
+                  Email
                 </label>
                 <input
-                  id="admin-username"
-                  type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  placeholder="Enter username"
-                  autoComplete="username"
+                  id="admin-email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter email"
+                  autoComplete="email"
                   autoFocus
                   className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#7FD856]/50 focus:border-[#7FD856]/50 transition-colors"
                 />
@@ -146,7 +146,7 @@ const LoginForm = ({ error, loading, onLogin }) => {
 
               <Button
                 type="submit"
-                disabled={loading || !username.trim() || !password.trim()}
+                disabled={loading || !email.trim() || !password.trim()}
                 className="w-full bg-[#7FD856] text-black hover:bg-[#6FC745] font-medium rounded-xl py-3 transition-colors disabled:opacity-60"
               >
                 {loading ? (
@@ -182,14 +182,14 @@ const Admin = () => {
     setActiveTab(tabId);
   };
 
-  const handleLogin = async (username, password) => {
+  const handleLogin = async (email, password) => {
     setError('');
     setLoading(true);
     try {
       const res = await fetch(`${API_BASE}/api/admin/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ email, password }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {

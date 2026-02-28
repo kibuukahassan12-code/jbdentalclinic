@@ -170,6 +170,21 @@ function runExtensionMigrations(database) {
     addMigration('patient_reports');
   }
 
+  // Users table (admin authentication)
+  if (!hasMigration('users')) {
+    database.exec(`
+      CREATE TABLE users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        email TEXT NOT NULL UNIQUE,
+        password TEXT NOT NULL,
+        role TEXT NOT NULL DEFAULT 'admin',
+        created_at TEXT DEFAULT (datetime('now'))
+      );
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email ON users(email);
+    `);
+    addMigration('users');
+  }
+
   // Phase 4: Inventory
   if (!hasMigration('inventory_items')) {
     database.exec(`

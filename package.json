@@ -9,11 +9,13 @@
     "build": "node tools/generate-llms.js || echo skipped && vite build",
     "preview": "vite preview --host :: --port 3000",
     "lint": "eslint . --quiet",
-    "server": "node server/index.js"
+    "server": "node server/index.js",
+    "seed-admin": "node server/scripts/ensureAdmin.js"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.1.1",
     "@radix-ui/react-toast": "^1.2.4",
+    "bcrypt": "^6.0.0",
     "better-sqlite3": "^11.6.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
