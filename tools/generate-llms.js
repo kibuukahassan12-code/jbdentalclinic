@@ -82,7 +82,26 @@ function extractRoutes(appJsxPath) {
 }
 
 function findReactFiles(dir) {
-  return fs.readdirSync(dir).map(item => path.join(dir, item));
+  const results = [];
+
+  function walk(d) {
+    const entries = fs.readdirSync(d);
+    for (const entry of entries) {
+      const full = path.join(d, entry);
+      const stat = fs.statSync(full);
+      if (stat.isDirectory()) {
+        walk(full);
+        continue;
+      }
+      if (!entry.endsWith('.jsx') && !entry.endsWith('.js') && !entry.endsWith('.tsx') && !entry.endsWith('.ts')) {
+        continue;
+      }
+      results.push(full);
+    }
+  }
+
+  walk(dir);
+  return results;
 }
 
 function extractHelmetData(content, filePath, routes) {
@@ -163,8 +182,8 @@ function main() {
   }
 
   if (pages.length === 0) {
-    console.error('❌ No pages with Helmet components found!');
-    process.exit(1);
+    console.log('No pages with Helmet components found, skipping llms.txt generation');
+    return;
   }
 
 
@@ -178,5 +197,9 @@ function main() {
 const isMainModule = import.meta.url === `file://${process.argv[1]}`;
 
 if (isMainModule) {
-  main();
+  try {
+    main();
+  } catch (e) {
+    console.log('LLM generation skipped:', e.message);
+  }
 }

@@ -27,7 +27,7 @@ import cron from 'node-cron';
 initDb();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8000;
 const isProd = process.env.NODE_ENV === 'production';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -68,26 +68,36 @@ app.get('/health', (req, res) => {
   res.status(200).send('OK');
 });
 
-if (isProd || fs.existsSync(distPath)) {
+if (fs.existsSync(distPath)) {
   app.use(express.static(distPath));
   app.get('*', (req, res) => {
     res.sendFile(path.join(distPath, 'index.html'));
   });
+} else {
+  app.get('/', (req, res) => {
+    res.status(200).send('JB Dental Clinic API running');
+  });
 }
 
-// Run reminder checks every 30 minutes for timely delivery
-// This includes: thank you messages, 1-day, 6-hour, and 1-hour reminders
-const cronSchedule = process.env.REMINDER_CRON || '*/30 * * * *';
-cron.schedule(cronSchedule, async () => {
-  try {
-    console.log('Running reminder checks...');
-    const results = await runAllReminders();
-    console.log('Reminders sent:', results);
-  } catch (e) {
-    console.error('Reminder cron error:', e);
-  }
-}, { timezone: process.env.TZ || 'Africa/Kampala' });
+function startReminderService() {
+  // Run reminder checks every 30 minutes for timely delivery
+  // This includes: thank you messages, 1-day, 6-hour, and 1-hour reminders
+  const cronSchedule = process.env.REMINDER_CRON || '*/30 * * * *';
+  cron.schedule(cronSchedule, async () => {
+    try {
+      console.log('Running reminder checks...');
+      const results = await runAllReminders();
+      console.log('Reminders sent:', results);
+    } catch (e) {
+      console.error('Reminder cron error:', e);
+    }
+  }, { timezone: process.env.TZ || 'Africa/Kampala' });
+}
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
+
+  setTimeout(() => {
+    startReminderService();
+  }, 5000);
 });
