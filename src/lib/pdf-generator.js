@@ -197,6 +197,18 @@ export function generateReceiptPdf({ payment, invoice, patient, allPayments = []
   const totalPaid = allPayments.reduce((s, p) => s + Number(p.amount || 0), 0);
   const balance = invoiceTotal - totalPaid;
 
+  let paymentsHtml = '';
+  if (allPayments.length > 0) {
+    allPayments.forEach((p) => {
+      paymentsHtml += `
+        <tr>
+          <td style="padding:8px;border-bottom:1px solid #f3f4f6;">${formatDate(p.paid_at)}</td>
+          <td style="padding:8px;border-bottom:1px solid #f3f4f6;">${p.payment_method || '—'}</td>
+          <td style="padding:8px;border-bottom:1px solid #f3f4f6;text-align:right;">UGX ${fmt(p.amount)}</td>
+        </tr>`;
+    });
+  }
+
   const html = `
     <div style="${WRAPPER_STYLE}">
       ${HEADER_HTML}
@@ -205,6 +217,9 @@ export function generateReceiptPdf({ payment, invoice, patient, allPayments = []
       <div style="text-align:center;margin-bottom:28px;">
         <h1 style="margin:0 0 4px 0;font-size:26px;font-weight:700;color:#0F0F0F;letter-spacing:2px;">RECEIPT</h1>
         <p style="margin:0;font-size:13px;color:#6b7280;">RCP-${payment.id} &bull; ${formatDate(payment.paid_at)}</p>
+        <span style="display:inline-block;margin-top:8px;padding:3px 14px;border-radius:20px;font-size:11px;font-weight:600;background:#dcfce7;color:#15803d;">
+          PAID
+        </span>
       </div>
 
       <!-- Received From -->
@@ -215,61 +230,63 @@ export function generateReceiptPdf({ payment, invoice, patient, allPayments = []
         ${patient?.email ? `<p style="margin:0;font-size:12px;color:#6b7280;">${patient.email}</p>` : ''}
       </div>
 
-      <!-- Amount Box -->
-      <div style="background:linear-gradient(135deg,#7FD856 0%,#5ab844 100%);padding:28px;border-radius:14px;text-align:center;margin-bottom:28px;">
-        <p style="margin:0 0 8px 0;font-size:12px;color:rgba(255,255,255,0.9);text-transform:uppercase;letter-spacing:1.5px;">Amount Received</p>
-        <p style="margin:0;font-size:38px;font-weight:700;color:white;">UGX ${fmt(payment.amount)}</p>
+      <!-- Items Table (same layout as invoice) -->
+      <table style="width:100%;border-collapse:collapse;margin-bottom:20px;">
+        <thead>
+          <tr style="background:#7FD856;">
+            <th style="padding:10px 8px;text-align:left;color:#0F0F0F;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;">Description</th>
+            <th style="padding:10px 8px;text-align:center;color:#0F0F0F;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;">Qty</th>
+            <th style="padding:10px 8px;text-align:right;color:#0F0F0F;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;">Amount (UGX)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding:10px 8px;border-bottom:1px solid #e5e7eb;">Payment for INV-${payment.invoice_id} (${payment.payment_method || 'Cash'})</td>
+            <td style="padding:10px 8px;border-bottom:1px solid #e5e7eb;text-align:center;">1</td>
+            <td style="padding:10px 8px;border-bottom:1px solid #e5e7eb;text-align:right;">UGX ${fmt(payment.amount)}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Totals (same layout as invoice) -->
+      <div style="display:flex;justify-content:flex-end;">
+        <div style="width:280px;">
+          ${invoice ? `
+          <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #e5e7eb;">
+            <span style="color:#4b5563;font-size:12px;">Invoice Total</span>
+            <span style="color:#0F0F0F;font-size:12px;font-weight:500;">UGX ${fmt(invoiceTotal)}</span>
+          </div>` : ''}
+          <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #e5e7eb;">
+            <span style="color:#4b5563;font-size:12px;">This Payment</span>
+            <span style="color:#16a34a;font-size:12px;font-weight:600;">UGX ${fmt(payment.amount)}</span>
+          </div>
+          ${invoice ? `
+          <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #e5e7eb;">
+            <span style="color:#4b5563;font-size:12px;">Total Paid to Date</span>
+            <span style="color:#16a34a;font-size:12px;font-weight:600;">UGX ${fmt(totalPaid)}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:10px 12px;background:${balance <= 0 ? '#dcfce7' : '#fef3c7'};border-radius:8px;margin-top:8px;">
+            <span style="color:#0F0F0F;font-size:13px;font-weight:700;">${balance <= 0 ? 'Paid in Full' : 'Balance Due'}</span>
+            <span style="color:${balance <= 0 ? '#15803d' : '#b45309'};font-size:15px;font-weight:700;">UGX ${fmt(Math.abs(balance))}</span>
+          </div>` : ''}
+        </div>
       </div>
 
-      <!-- Payment Details -->
-      <div style="background:#f9fafb;padding:18px 20px;border-radius:10px;margin-bottom:24px;">
-        <p style="margin:0 0 12px 0;font-size:10px;color:#9ca3af;text-transform:uppercase;letter-spacing:1px;">Payment Details</p>
-        <table style="width:100%;">
-          <tr>
-            <td style="padding:7px 0;border-bottom:1px solid #e5e7eb;">
-              <span style="color:#6b7280;font-size:12px;">Payment Method</span>
-            </td>
-            <td style="padding:7px 0;border-bottom:1px solid #e5e7eb;text-align:right;">
-              <span style="color:#0F0F0F;font-size:12px;font-weight:600;">${payment.payment_method || 'N/A'}</span>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding:7px 0;border-bottom:1px solid #e5e7eb;">
-              <span style="color:#6b7280;font-size:12px;">Invoice Reference</span>
-            </td>
-            <td style="padding:7px 0;border-bottom:1px solid #e5e7eb;text-align:right;">
-              <span style="color:#0F0F0F;font-size:12px;font-weight:600;">INV-${payment.invoice_id}</span>
-            </td>
-          </tr>
-          ${invoice ? `
-          <tr>
-            <td style="padding:7px 0;border-bottom:1px solid #e5e7eb;">
-              <span style="color:#6b7280;font-size:12px;">Invoice Total</span>
-            </td>
-            <td style="padding:7px 0;border-bottom:1px solid #e5e7eb;text-align:right;">
-              <span style="color:#0F0F0F;font-size:12px;font-weight:500;">UGX ${fmt(invoiceTotal)}</span>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding:7px 0;border-bottom:1px solid #e5e7eb;">
-              <span style="color:#6b7280;font-size:12px;">Total Paid to Date</span>
-            </td>
-            <td style="padding:7px 0;border-bottom:1px solid #e5e7eb;text-align:right;">
-              <span style="color:#16a34a;font-size:12px;font-weight:600;">UGX ${fmt(totalPaid)}</span>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding:10px 0;">
-              <span style="color:#0F0F0F;font-size:13px;font-weight:700;">Balance After Payment</span>
-            </td>
-            <td style="padding:10px 0;text-align:right;">
-              <span style="color:${balance <= 0 ? '#15803d' : '#b45309'};font-size:15px;font-weight:700;">
-                ${balance <= 0 ? 'PAID IN FULL' : 'UGX ' + fmt(balance)}
-              </span>
-            </td>
-          </tr>` : ''}
+      <!-- Payment History -->
+      ${allPayments.length > 0 ? `
+      <div style="margin-top:28px;padding-top:18px;border-top:1px solid #e5e7eb;">
+        <p style="margin:0 0 10px 0;font-size:10px;color:#9ca3af;text-transform:uppercase;letter-spacing:1px;">Payment History</p>
+        <table style="width:100%;border-collapse:collapse;">
+          <thead>
+            <tr style="background:#f9fafb;">
+              <th style="padding:7px 8px;text-align:left;font-size:10px;color:#6b7280;text-transform:uppercase;">Date</th>
+              <th style="padding:7px 8px;text-align:left;font-size:10px;color:#6b7280;text-transform:uppercase;">Method</th>
+              <th style="padding:7px 8px;text-align:right;font-size:10px;color:#6b7280;text-transform:uppercase;">Amount</th>
+            </tr>
+          </thead>
+          <tbody>${paymentsHtml}</tbody>
         </table>
-      </div>
+      </div>` : ''}
 
       ${FOOTER_HTML}
     </div>`;
