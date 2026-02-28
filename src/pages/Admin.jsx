@@ -64,8 +64,8 @@ const TABS = [
 ];
 
 const LoginForm = ({ error, loading, onLogin }) => {
-  const [email, setEmail] = useState('admin@jbdentalclinic.com');
-  const [password, setPassword] = useState('@Admin123#');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e) => {
@@ -78,6 +78,7 @@ const LoginForm = ({ error, loading, onLogin }) => {
     <>
       <Helmet>
         <title>Admin Login | JB Dental Clinic Kampala</title>
+        <meta name="robots" content="noindex, nofollow" />
       </Helmet>
       <div className="min-h-screen flex items-center justify-center px-4 bg-[#0F0F0F]">
         <motion.div
@@ -234,6 +235,7 @@ const Admin = () => {
     <>
       <Helmet>
         <title>Admin | JB Dental Clinic Kampala</title>
+        <meta name="robots" content="noindex, nofollow" />
       </Helmet>
       <div className="min-h-screen bg-[#0F0F0F] text-white">
         {/* Header – same tone as site nav */}
