@@ -95,14 +95,14 @@ function startReminderService() {
   }, { timezone: process.env.TZ || 'Africa/Kampala' });
 }
 
-app.listen(PORT, '0.0.0.0', async () => {
-  console.log(`Server running on port ${PORT}`);
+try {
+  await ensureAdmin();
+} catch (e) {
+  console.error('Admin seed error:', e);
+}
 
-  try {
-    await ensureAdmin();
-  } catch (e) {
-    console.error('Admin seed error:', e);
-  }
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server running on port ${PORT}`);
 
   setTimeout(() => {
     startReminderService();
