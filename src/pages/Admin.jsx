@@ -240,14 +240,17 @@ const Admin = () => {
         <header className="sticky top-0 z-40 border-b border-white/10 bg-[#0F0F0F]/95 backdrop-blur-md">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
-              <Link to="/" className="text-white hover:text-[#7FD856] transition-colors font-semibold text-sm">
-
-              </Link>
+              <div className="flex items-center gap-3">
+                <Link to="/" className="text-white hover:text-[#7FD856] transition-colors font-semibold text-sm">
+                  JB Dental Clinic
+                </Link>
+                <span className="text-xs text-gray-500">/</span>
+                <span className="text-xs font-semibold tracking-wide text-gray-300">ADMIN PANEL</span>
+              </div>
               <Button
-                variant="outline"
                 size="sm"
                 onClick={handleLogout}
-                className="border-white/20 text-gray-300 hover:text-white hover:bg-white/10 rounded-xl"
+                className="bg-red-500/15 text-red-200 hover:bg-red-500/25 border border-red-500/30 rounded-xl"
               >
                 <LogOut className="mr-2" size={16} />
                 Log out

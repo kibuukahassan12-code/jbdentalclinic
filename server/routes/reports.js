@@ -179,14 +179,14 @@ router.get('/cashbook', (req, res) => {
     // Get payments as income entries (joined with invoices + patients)
     const incomeSQL = `
       SELECT 
-        p.id, p.paid_at AS date, p.amount, p.payment_method AS method,
+        p.id, date(p.paid_at) AS date, p.amount, p.payment_method AS method,
         'income' AS type,
         COALESCE(pt.full_name, 'Patient #' || i.patient_id) AS description,
         'INV-' || i.id AS reference
       FROM payments p
       LEFT JOIN invoices i ON p.invoice_id = i.id
       LEFT JOIN patients pt ON i.patient_id = pt.id
-      WHERE 1=1 ${dateFilter.replace(/date/g, 'p.paid_at')}
+      WHERE 1=1 ${dateFilter.replace(/date/g, "date(p.paid_at)")}
     `;
 
     // Get expenses
@@ -211,7 +211,7 @@ router.get('/cashbook', (req, res) => {
     const entries = db.prepare(combinedSQL).all(...allParams);
 
     // Get totals for the period
-    const totalIncomeSQL = `SELECT COALESCE(SUM(p.amount), 0) AS total FROM payments p WHERE 1=1 ${dateFilter.replace(/date/g, 'p.paid_at')}`;
+    const totalIncomeSQL = `SELECT COALESCE(SUM(p.amount), 0) AS total FROM payments p WHERE 1=1 ${dateFilter.replace(/date/g, "date(p.paid_at)")}`;
     const totalExpenseSQL = `SELECT COALESCE(SUM(amount), 0) AS total FROM expenses WHERE 1=1 ${dateFilter}`;
 
     const totalIncome = db.prepare(totalIncomeSQL).get(...params)?.total || 0;
@@ -245,13 +245,13 @@ router.get('/profit-loss', (req, res) => {
     const incomeByMethodSQL = `
       SELECT p.payment_method AS label, COALESCE(SUM(p.amount), 0) AS amount, COUNT(*) AS count
       FROM payments p
-      WHERE 1=1 ${dateFilter.replace(/date/g, 'p.paid_at')}
+      WHERE 1=1 ${dateFilter.replace(/date/g, "date(p.paid_at)")}
       GROUP BY p.payment_method ORDER BY amount DESC
     `;
     const incomeByMethod = db.prepare(incomeByMethodSQL).all(...params);
 
     // Total income
-    const totalIncomeSQL = `SELECT COALESCE(SUM(p.amount), 0) AS total FROM payments p WHERE 1=1 ${dateFilter.replace(/date/g, 'p.paid_at')}`;
+    const totalIncomeSQL = `SELECT COALESCE(SUM(p.amount), 0) AS total FROM payments p WHERE 1=1 ${dateFilter.replace(/date/g, "date(p.paid_at)")}`;
     const totalIncome = db.prepare(totalIncomeSQL).get(...params)?.total || 0;
 
     // Expenses by category
@@ -269,13 +269,13 @@ router.get('/profit-loss', (req, res) => {
 
     // Recent income entries (payments)
     const recentIncomeSQL = `
-      SELECT p.id, p.paid_at AS date, p.amount, p.payment_method,
+      SELECT p.id, date(p.paid_at) AS date, p.amount, p.payment_method,
         COALESCE(pt.full_name, 'Patient #' || i.patient_id) AS patient_name,
         'INV-' || i.id AS reference
       FROM payments p
       LEFT JOIN invoices i ON p.invoice_id = i.id
       LEFT JOIN patients pt ON i.patient_id = pt.id
-      WHERE 1=1 ${dateFilter.replace(/date/g, 'p.paid_at')}
+      WHERE 1=1 ${dateFilter.replace(/date/g, "date(p.paid_at)")}
       ORDER BY p.paid_at DESC LIMIT 50
     `;
     const recentIncome = db.prepare(recentIncomeSQL).all(...params);
