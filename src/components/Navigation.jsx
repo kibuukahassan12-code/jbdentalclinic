@@ -27,6 +27,8 @@ const Navigation = () => {
     { name: 'Admin', path: '/admin' },
   ];
 
+  if (location.pathname.startsWith('/admin')) return null;
+
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
       isScrolled ? 'bg-[#0F0F0F]/95 backdrop-blur-md shadow-lg' : 'bg-transparent'
