@@ -241,13 +241,19 @@ const Admin = () => {
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-14">
               <span className="text-sm font-semibold tracking-wide text-gray-300 uppercase">Admin Panel</span>
-              <Button
-                onClick={handleLogout}
-                className="flex-shrink-0 bg-red-600 text-white hover:bg-red-700 border border-red-500 rounded-xl px-5 py-2.5 font-semibold text-sm shadow-lg"
-              >
-                <LogOut className="mr-2" size={16} />
-                Sign Out
-              </Button>
+              <div className="flex items-center gap-2">
+                <Link to="/appointment" className="flex-shrink-0 inline-flex items-center gap-1.5 bg-[#7FD856] text-black hover:bg-[#6FC745] rounded-xl px-4 py-2.5 font-semibold text-sm shadow-lg transition-colors">
+                  <Calendar size={15} />
+                  Book Appointment
+                </Link>
+                <Button
+                  onClick={handleLogout}
+                  className="flex-shrink-0 bg-red-600 text-white hover:bg-red-700 border border-red-500 rounded-xl px-5 py-2.5 font-semibold text-sm shadow-lg"
+                >
+                  <LogOut className="mr-2" size={16} />
+                  Sign Out
+                </Button>
+              </div>
             </div>
           </div>
         </header>
