@@ -343,7 +343,7 @@ export default function AdminDashboard({ api, getStoredKey, onNavigate }) {
                         <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => onNavigate && onNavigate('payments')}
+                            onClick={() => onNavigate && onNavigate('finances')}
                             className="text-gray-400 hover:text-white"
                         >
                             Manage <ArrowRight size={14} className="ml-1" />
