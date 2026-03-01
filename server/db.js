@@ -12,19 +12,22 @@ let db;
 
 function resolveDbPath() {
   // Prefer env-provided path (e.g., /app/data/appointments.db)
-  const envPath = process.env.DATABASE_PATH || path.join(__dirname, '..', 'data', 'appointments.db');
-  // Ensure parent directory exists
+  const envPath = process.env.DATABASE_PATH || '/app/data/appointments.db';
+  const resolvedPath = path.resolve(envPath);
+  const parentDir = path.dirname(resolvedPath);
   try {
-    fs.mkdirSync(path.dirname(envPath), { recursive: true });
-    // Test writeability by opening/closing a dummy file
-    const testPath = path.join(path.dirname(envPath), '.write-test');
-    fs.writeFileSync(testPath, '');
-    fs.unlinkSync(testPath);
-    return envPath;
+    // Ensure parent directory exists
+    fs.mkdirSync(parentDir, { recursive: true });
+    // Check write permissions
+    fs.accessSync(parentDir, fs.constants.W_OK);
+    console.log(`[db] Using database path: ${resolvedPath}`);
+    return resolvedPath;
   } catch (e) {
-    // Fallback to local ./data/appointments.db if volume not writable
-    const fallbackPath = path.join(__dirname, '..', 'data', 'appointments.db');
-    fs.mkdirSync(path.dirname(fallbackPath), { recursive: true });
+    // Fallback to local ./data/appointments.db if not writable
+    const fallbackPath = path.resolve(__dirname, '..', 'data', 'appointments.db');
+    const fallbackParent = path.dirname(fallbackPath);
+    fs.mkdirSync(fallbackParent, { recursive: true });
+    console.log(`[db] Fallback to local database path: ${fallbackPath}`);
     return fallbackPath;
   }
 }
