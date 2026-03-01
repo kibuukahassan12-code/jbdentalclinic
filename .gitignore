@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.env
+.env.local
+
+# SQLite database file - persisted via DATABASE_PATH env var in production
+data/*.sqlite
+data/*.sqlite-shm
+data/*.sqlite-wal
