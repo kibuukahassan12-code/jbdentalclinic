@@ -239,11 +239,11 @@ const Admin = () => {
         {/* Header – same tone as site nav */}
         <header className="sticky top-0 z-50 border-b border-white/10 bg-[#0F0F0F] backdrop-blur-md">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-14">
+            <div className="relative flex items-center justify-center h-14">
               <span className="text-sm font-semibold tracking-wide text-gray-300 uppercase">Admin Panel</span>
               <Button
                 onClick={handleLogout}
-                className="flex-shrink-0 bg-red-600 text-white hover:bg-red-700 border border-red-500 rounded-xl px-5 py-2.5 font-semibold text-sm shadow-lg"
+                className="absolute right-0 flex-shrink-0 bg-red-600 text-white hover:bg-red-700 border border-red-500 rounded-xl px-5 py-2.5 font-semibold text-sm shadow-lg"
               >
                 <LogOut className="mr-2" size={16} />
                 Sign Out
