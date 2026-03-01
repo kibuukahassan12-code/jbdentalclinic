@@ -2,7 +2,7 @@ import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { motion } from 'framer-motion';
-import { LayoutDashboard, Calendar, Users, UserCog, LogOut, Stethoscope, ClipboardList, Activity, FileText, CreditCard, Package, BarChart3, FileCheck, Scale } from 'lucide-react';
+import { LayoutDashboard, Calendar, Users, UserCog, LogOut, Stethoscope, ClipboardList, Activity, FileText, Package, BarChart3, FileCheck, Scale } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 const AdminDashboard = lazy(() => import('@/pages/admin/AdminDashboard'));
 const AdminAppointments = lazy(() => import('@/pages/admin/AdminAppointments'));
@@ -12,7 +12,6 @@ const AdminTreatments = lazy(() => import('@/pages/admin/AdminTreatments'));
 const AdminTreatmentPlans = lazy(() => import('@/pages/admin/AdminTreatmentPlans'));
 const AdminDentalChart = lazy(() => import('@/pages/admin/AdminDentalChart'));
 const AdminInvoices = lazy(() => import('@/pages/admin/AdminInvoices'));
-const AdminPayments = lazy(() => import('@/pages/admin/AdminPayments'));
 const AdminInventory = lazy(() => import('@/pages/admin/AdminInventory'));
 const AdminFinances = lazy(() => import('@/pages/admin/AdminFinances'));
 const AdminReports = lazy(() => import('@/pages/admin/AdminReports'));
@@ -56,7 +55,6 @@ const TABS = [
   { id: 'treatment-plans', label: 'Plans', icon: ClipboardList },
   { id: 'dental-chart', label: 'Chart', icon: Activity },
   { id: 'invoices', label: 'Invoices', icon: FileText },
-  { id: 'payments', label: 'Payments', icon: CreditCard },
   { id: 'patient-reports', label: 'Patient Reports', icon: FileCheck },
   { id: 'inventory', label: 'Inventory', icon: Package },
   { id: 'finances', label: 'Finances', icon: Scale },
@@ -310,9 +308,6 @@ const Admin = () => {
             )}
             {activeTab === 'invoices' && (
               <AdminInvoices api={api} getStoredKey={getStoredKey} />
-            )}
-            {activeTab === 'payments' && (
-              <AdminPayments api={api} getStoredKey={getStoredKey} />
             )}
             {activeTab === 'patient-reports' && (
               <AdminPatientReports api={api} getStoredKey={getStoredKey} />
