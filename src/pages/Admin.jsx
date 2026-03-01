@@ -237,19 +237,13 @@ const Admin = () => {
       </Helmet>
       <div className="min-h-screen bg-[#0F0F0F] text-white">
         {/* Header – same tone as site nav */}
-        <header className="sticky top-0 z-40 border-b border-white/10 bg-[#0F0F0F]/95 backdrop-blur-md">
+        <header className="sticky top-0 z-50 border-b border-white/10 bg-[#0F0F0F] backdrop-blur-md">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-16">
-              <Link to="/" className="flex-shrink-0">
-                <img
-                  src="https://horizons-cdn.hostinger.com/389eff78-3123-445d-bf00-9ef97ab253ec/f51b96d62e1c9d03d4878cf068f6e99e.png"
-                  alt="JB Dental Clinic Logo"
-                  className="h-10 w-auto object-contain"
-                />
-              </Link>
+            <div className="flex items-center justify-between h-14">
+              <span className="text-sm font-semibold tracking-wide text-gray-300 uppercase">Admin Panel</span>
               <Button
                 onClick={handleLogout}
-                className="flex-shrink-0 bg-red-600 text-white hover:bg-red-700 border border-red-500 rounded-xl px-4 py-2 font-semibold text-sm shadow-lg"
+                className="flex-shrink-0 bg-red-600 text-white hover:bg-red-700 border border-red-500 rounded-xl px-5 py-2.5 font-semibold text-sm shadow-lg"
               >
                 <LogOut className="mr-2" size={16} />
                 Sign Out
