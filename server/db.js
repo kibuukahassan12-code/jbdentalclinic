@@ -1,19 +1,23 @@
 import Database from 'better-sqlite3';
-import { mkdirSync, existsSync } from 'fs';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
+import path from 'path';
+import cron from 'node-cron';
 import { runExtensionMigrations } from './migrate-extensions.js';
 import { normalizeE164 } from './lib/whatsapp.js';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const dbPath = process.env.DATABASE_PATH || join(__dirname, '..', 'data', 'appointments.db');
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 let db;
 
+function resolveDbPath() {
+  return process.env.DATABASE_PATH || path.join(__dirname, '..', 'data', 'appointments.db');
+}
+
 export function getDb() {
   if (!db) {
-    const dir = dirname(dbPath);
-    if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
+    const dbPath = resolveDbPath();
+    fs.mkdirSync(path.dirname(dbPath), { recursive: true });
     db = new Database(dbPath);
     db.pragma('journal_mode = WAL');
     db.pragma('foreign_keys = ON');
@@ -50,7 +54,99 @@ function migrate(database) {
 }
 
 export function initDb() {
-  return getDb();
+  const database = getDb();
+  // Core tables
+  database.exec(`
+    CREATE TABLE IF NOT EXISTS patients (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      full_name TEXT NOT NULL,
+      phone TEXT NOT NULL,
+      email TEXT,
+      date_of_birth TEXT,
+      gender TEXT,
+      medical_history TEXT,
+      allergies TEXT,
+      created_at TEXT DEFAULT (datetime('now'))
+    );
+    CREATE INDEX IF NOT EXISTS idx_patients_phone ON patients(phone);
+    CREATE INDEX IF NOT EXISTS idx_patients_name ON patients(full_name);
+  `);
+  database.exec(`
+    CREATE TABLE IF NOT EXISTS appointments (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      patient_name TEXT NOT NULL,
+      patient_phone TEXT NOT NULL,
+      patient_id INTEGER,
+      appointment_date TEXT NOT NULL,
+      appointment_time TEXT NOT NULL,
+      duration_minutes INTEGER DEFAULT 30,
+      service TEXT,
+      notes TEXT,
+      status TEXT DEFAULT 'Scheduled',
+      reminder_sent_at TEXT,
+      thank_you_sent_at TEXT,
+      reminder_1day_sent_at TEXT,
+      reminder_6h_sent_at TEXT,
+      reminder_1h_sent_at TEXT,
+      created_at TEXT DEFAULT (datetime('now')),
+      updated_at TEXT DEFAULT (datetime('now'))
+    );
+    CREATE INDEX IF NOT EXISTS idx_appointments_date ON appointments(appointment_date);
+    CREATE INDEX IF NOT EXISTS idx_appointments_reminder ON appointments(appointment_date, reminder_sent_at);
+  `);
+  database.exec(`
+    CREATE TABLE IF NOT EXISTS payments (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      invoice_id INTEGER NOT NULL,
+      amount REAL NOT NULL,
+      payment_method TEXT NOT NULL,
+      paid_at TEXT DEFAULT (datetime('now')),
+      created_at TEXT DEFAULT (datetime('now'))
+    );
+    CREATE INDEX IF NOT EXISTS idx_payments_invoice ON payments(invoice_id);
+  `);
+  database.exec(`
+    CREATE TABLE IF NOT EXISTS treatments (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      patient_id INTEGER NOT NULL,
+      dentist_id INTEGER,
+      treatment_plan_id INTEGER,
+      service_name TEXT NOT NULL,
+      description TEXT,
+      cost REAL,
+      treatment_date TEXT,
+      status TEXT DEFAULT 'Pending',
+      created_at TEXT DEFAULT (datetime('now')),
+      updated_at TEXT DEFAULT (datetime('now'))
+    );
+    CREATE INDEX IF NOT EXISTS idx_treatments_patient ON treatments(patient_id);
+    CREATE INDEX IF NOT EXISTS idx_treatments_plan ON treatments(treatment_plan_id);
+    CREATE INDEX IF NOT EXISTS idx_treatments_date ON treatments(treatment_date);
+  `);
+  // Run extension migrations for remaining tables (staff, invoices, inventory, etc.)
+  runExtensionMigrations(database);
+  // Schedule daily backup
+  scheduleBackup();
+  return database;
+}
+
+// ---------- Automatic Backup ----------
+function scheduleBackup() {
+  // Run once daily at 2 AM server time (adjustable via env)
+  const schedule = process.env.BACKUP_CRON || '0 2 * * *';
+  cron.schedule(schedule, () => {
+    try {
+      const src = resolveDbPath();
+      const backupsDir = path.join(path.dirname(src), '..', 'backups');
+      fs.mkdirSync(backupsDir, { recursive: true });
+      const timestamp = new Date().toISOString().slice(0, 10);
+      const dest = path.join(backupsDir, `appointments-${timestamp}.db`);
+      fs.copyFileSync(src, dest);
+      console.log(`[backup] Database backed up to ${dest}`);
+    } catch (e) {
+      console.error('[backup] Backup failed:', e);
+    }
+  }, { scheduled: true, timezone: process.env.TZ || 'Africa/Kampala' });
 }
 
 export function getAppointments(filters = {}) {
