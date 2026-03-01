@@ -11,13 +11,27 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 let db;
 
 function resolveDbPath() {
-  return process.env.DATABASE_PATH || path.join(__dirname, '..', 'data', 'appointments.db');
+  // Prefer env-provided path (e.g., /app/data/appointments.db)
+  const envPath = process.env.DATABASE_PATH || path.join(__dirname, '..', 'data', 'appointments.db');
+  // Ensure parent directory exists
+  try {
+    fs.mkdirSync(path.dirname(envPath), { recursive: true });
+    // Test writeability by opening/closing a dummy file
+    const testPath = path.join(path.dirname(envPath), '.write-test');
+    fs.writeFileSync(testPath, '');
+    fs.unlinkSync(testPath);
+    return envPath;
+  } catch (e) {
+    // Fallback to local ./data/appointments.db if volume not writable
+    const fallbackPath = path.join(__dirname, '..', 'data', 'appointments.db');
+    fs.mkdirSync(path.dirname(fallbackPath), { recursive: true });
+    return fallbackPath;
+  }
 }
 
 export function getDb() {
   if (!db) {
     const dbPath = resolveDbPath();
-    fs.mkdirSync(path.dirname(dbPath), { recursive: true });
     db = new Database(dbPath);
     db.pragma('journal_mode = WAL');
     db.pragma('foreign_keys = ON');
