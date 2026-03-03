@@ -12,6 +12,13 @@ import Home from '@/pages/Home';
 import Services from '@/pages/Services';
 import Appointment from '@/pages/Appointment';
 
+// Admin pages
+import AdminLogin from '@/pages/admin/AdminLogin';
+import AdminLayout from '@/components/admin/AdminLayout';
+const AdminDashboard = lazy(() => import('@/pages/admin/AdminDashboard'));
+const AdminPatients = lazy(() => import('@/pages/admin/AdminPatients'));
+const AdminAppointments = lazy(() => import('@/pages/admin/AdminAppointments'));
+
 // Lazy load less critical pages and service details
 const About = lazy(() => import('@/pages/About'));
 const Team = lazy(() => import('@/pages/Team'));
@@ -47,36 +54,47 @@ function App() {
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
       </Helmet>
-      <div className="min-h-screen bg-[#0F0F0F] text-white">
-        <Navigation />
-        <Suspense fallback={<PageLoader />}>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/services" element={<Services />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/team" element={<Team />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/appointment" element={<Appointment />} />
-            
-            {/* Service Detail Routes */}
-            <Route path="/services/general-dentistry" element={<GeneralDentistry />} />
-            <Route path="/services/cosmetic-dentistry" element={<CosmeticDentistry />} />
-            <Route path="/services/dental-implants" element={<DentalImplants />} />
-            <Route path="/services/orthodontics" element={<Orthodontics />} />
-            <Route path="/services/teeth-whitening" element={<TeethWhitening />} />
-            <Route path="/services/root-canal" element={<RootCanal />} />
-            <Route path="/services/dental-crowns" element={<DentalCrowns />} />
-            <Route path="/services/periodontics" element={<Periodontics />} />
-            <Route path="/services/emergency-dental" element={<EmergencyDental />} />
-            <Route path="/services/pediatric-dentistry" element={<PediatricDentistry />} />
-            <Route path="/services/tooth-extraction" element={<ToothExtraction />} />
-            <Route path="/services/dental-bridges" element={<DentalBridges />} />
-            <Route path="/services/bridal-dentistry" element={<BridalDentistry />} />
-          </Routes>
-        </Suspense>
-        <Footer />
-        <Toaster />
-      </div>
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
+          {/* Admin Routes — no Navigation/Footer */}
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route path="dashboard" element={<AdminDashboard />} />
+            <Route path="patients" element={<AdminPatients />} />
+            <Route path="appointments" element={<AdminAppointments />} />
+          </Route>
+
+          {/* Public Routes */}
+          <Route path="/*" element={
+            <div className="min-h-screen bg-[#0F0F0F] text-white">
+              <Navigation />
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/services" element={<Services />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/team" element={<Team />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/appointment" element={<Appointment />} />
+                <Route path="/services/general-dentistry" element={<GeneralDentistry />} />
+                <Route path="/services/cosmetic-dentistry" element={<CosmeticDentistry />} />
+                <Route path="/services/dental-implants" element={<DentalImplants />} />
+                <Route path="/services/orthodontics" element={<Orthodontics />} />
+                <Route path="/services/teeth-whitening" element={<TeethWhitening />} />
+                <Route path="/services/root-canal" element={<RootCanal />} />
+                <Route path="/services/dental-crowns" element={<DentalCrowns />} />
+                <Route path="/services/periodontics" element={<Periodontics />} />
+                <Route path="/services/emergency-dental" element={<EmergencyDental />} />
+                <Route path="/services/pediatric-dentistry" element={<PediatricDentistry />} />
+                <Route path="/services/tooth-extraction" element={<ToothExtraction />} />
+                <Route path="/services/dental-bridges" element={<DentalBridges />} />
+                <Route path="/services/bridal-dentistry" element={<BridalDentistry />} />
+              </Routes>
+              <Footer />
+              <Toaster />
+            </div>
+          } />
+        </Routes>
+      </Suspense>
     </Router>
   );
 }

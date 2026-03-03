@@ -4,6 +4,7 @@ import nodePath from 'path';
 import { fileURLToPath } from 'url';
 import appointmentsRouter from './routes/appointments.js';
 import patientsRouter from './routes/patients.js';
+import adminRouter from './routes/admin.js';
 
 const __dirname = nodePath.dirname(fileURLToPath(import.meta.url));
 const distPath = nodePath.join(__dirname, '..', 'dist');
@@ -16,6 +17,7 @@ app.use(express.json());
 
 app.use('/api/appointments', appointmentsRouter);
 app.use('/api/patients', patientsRouter);
+app.use('/api/admin', adminRouter);
 
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
