@@ -3,6 +3,7 @@ import fs from 'fs';
 import { fileURLToPath } from 'url';
 import path from 'path';
 import cron from 'node-cron';
+import bcrypt from 'bcrypt';
 import { runExtensionMigrations } from './migrate-extensions.js';
 import { normalizeE164 } from './lib/whatsapp.js';
 
@@ -73,6 +74,48 @@ function migrate(database) {
 export function initDb() {
   const database = getDb();
   // Core tables
+  database.exec(`
+    CREATE TABLE IF NOT EXISTS settings (
+      key TEXT PRIMARY KEY,
+      value TEXT NOT NULL,
+      updated_at TEXT DEFAULT (datetime('now'))
+    );
+  `);
+  database.exec(`
+    CREATE TABLE IF NOT EXISTS communication_logs (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      appointment_id INTEGER,
+      patient_id INTEGER,
+      patient_name TEXT,
+      patient_phone TEXT,
+      type TEXT NOT NULL,
+      channel TEXT NOT NULL,
+      status TEXT NOT NULL,
+      message TEXT,
+      error TEXT,
+      sent_at TEXT DEFAULT (datetime('now'))
+    );
+    CREATE INDEX IF NOT EXISTS idx_comm_logs_appointment ON communication_logs(appointment_id);
+    CREATE INDEX IF NOT EXISTS idx_comm_logs_sent_at ON communication_logs(sent_at);
+  `);
+  database.exec(`
+    CREATE TABLE IF NOT EXISTS audit_logs (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER,
+      user_email TEXT,
+      action TEXT NOT NULL,
+      entity_type TEXT NOT NULL,
+      entity_id INTEGER,
+      old_values TEXT,
+      new_values TEXT,
+      ip_address TEXT,
+      user_agent TEXT,
+      created_at TEXT DEFAULT (datetime('now'))
+    );
+    CREATE INDEX IF NOT EXISTS idx_audit_logs_user ON audit_logs(user_id);
+    CREATE INDEX IF NOT EXISTS idx_audit_logs_entity ON audit_logs(entity_type, entity_id);
+    CREATE INDEX IF NOT EXISTS idx_audit_logs_created ON audit_logs(created_at);
+  `);
   database.exec(`
     CREATE TABLE IF NOT EXISTS patients (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -949,4 +992,177 @@ export function getExpenseRange(startDate, endDate) {
     WHERE date BETWEEN ? AND ?
   `).get(startDate, endDate);
   return row ? Number(row.total) : 0;
+}
+
+// ---------- Settings ----------
+export function getSetting(key) {
+  const row = getDb().prepare('SELECT value FROM settings WHERE key = ?').get(key);
+  return row ? row.value : null;
+}
+
+export function getAllSettings() {
+  return getDb().prepare('SELECT key, value, updated_at FROM settings ORDER BY key').all();
+}
+
+export function setSetting(key, value) {
+  const stmt = getDb().prepare(`
+    INSERT INTO settings (key, value, updated_at) VALUES (?, ?, datetime('now'))
+    ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at
+  `);
+  return stmt.run(key, value);
+}
+
+export function deleteSetting(key) {
+  return getDb().prepare('DELETE FROM settings WHERE key = ?').run(key);
+}
+
+// ---------- Communication Logs ----------
+export function logCommunication(data) {
+  const stmt = getDb().prepare(`
+    INSERT INTO communication_logs (appointment_id, patient_id, patient_name, patient_phone, type, channel, status, message, error, sent_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
+  `);
+  return stmt.run(
+    data.appointment_id ?? null,
+    data.patient_id ?? null,
+    data.patient_name ?? null,
+    data.patient_phone ?? null,
+    data.type,
+    data.channel,
+    data.status,
+    data.message ?? null,
+    data.error ?? null
+  ).lastInsertRowid;
+}
+
+export function getCommunicationLogs(filters = {}) {
+  const database = getDb();
+  const { limit = 100, offset = 0, patient_id, appointment_id, type, status } = filters;
+  let sql = 'SELECT * FROM communication_logs WHERE 1=1';
+  const params = [];
+  if (patient_id) { sql += ' AND patient_id = ?'; params.push(patient_id); }
+  if (appointment_id) { sql += ' AND appointment_id = ?'; params.push(appointment_id); }
+  if (type) { sql += ' AND type = ?'; params.push(type); }
+  if (status) { sql += ' AND status = ?'; params.push(status); }
+  sql += ' ORDER BY sent_at DESC LIMIT ? OFFSET ?';
+  params.push(Math.min(Number(limit) || 100, 500), Number(offset) || 0);
+  return database.prepare(sql).all(...params);
+}
+
+export function getCommunicationStats() {
+  const database = getDb();
+  const today = new Date().toISOString().slice(0, 10);
+  const stats = {
+    today: database.prepare("SELECT COUNT(*) as count FROM communication_logs WHERE date(sent_at) = ?").get(today).count,
+    total: database.prepare("SELECT COUNT(*) as count FROM communication_logs").get().count,
+    byChannel: database.prepare("SELECT channel, COUNT(*) as count FROM communication_logs GROUP BY channel").all(),
+    byStatus: database.prepare("SELECT status, COUNT(*) as count FROM communication_logs GROUP BY status").all(),
+    recent: database.prepare("SELECT * FROM communication_logs ORDER BY sent_at DESC LIMIT 20").all(),
+  };
+  return stats;
+}
+
+// ---------- Users (Admin Management) ----------
+export function getUsers(filters = {}) {
+  const database = getDb();
+  const { limit = 100, offset = 0, role } = filters;
+  let sql = 'SELECT id, email, role, created_at FROM users WHERE 1=1';
+  const params = [];
+  if (role) { sql += ' AND role = ?'; params.push(role); }
+  sql += ' ORDER BY created_at DESC LIMIT ? OFFSET ?';
+  params.push(Math.min(Number(limit) || 100, 500), Number(offset) || 0);
+  return database.prepare(sql).all(...params);
+}
+
+export function getUserById(id) {
+  return getDb().prepare('SELECT id, email, role, created_at FROM users WHERE id = ?').get(id);
+}
+
+export function getUserByEmail(email) {
+  return getDb().prepare('SELECT * FROM users WHERE email = ?').get(email);
+}
+
+export async function createUser(data) {
+  const database = getDb();
+  const hash = await bcrypt.hash(data.password, 10);
+  const stmt = database.prepare('INSERT INTO users (email, password, role) VALUES (?, ?, ?)');
+  return stmt.run(data.email.toLowerCase().trim(), hash, data.role || 'staff').lastInsertRowid;
+}
+
+export async function updateUser(id, data) {
+  const database = getDb();
+  const user = getUserById(id);
+  if (!user) return null;
+  
+  const updates = [];
+  const params = [];
+  
+  if (data.email) {
+    updates.push('email = ?');
+    params.push(data.email.toLowerCase().trim());
+  }
+  if (data.role) {
+    updates.push('role = ?');
+    params.push(data.role);
+  }
+  if (data.password) {
+    const hash = await bcrypt.hash(data.password, 10);
+    updates.push('password = ?');
+    params.push(hash);
+  }
+  
+  if (updates.length === 0) return user;
+  
+  params.push(id);
+  const stmt = database.prepare(`UPDATE users SET ${updates.join(', ')} WHERE id = ?`);
+  stmt.run(...params);
+  return getUserById(id);
+}
+
+export function deleteUser(id) {
+  return getDb().prepare('DELETE FROM users WHERE id = ?').run(id);
+}
+
+// ---------- Audit Logs ----------
+export function logAudit(data) {
+  const stmt = getDb().prepare(`
+    INSERT INTO audit_logs (user_id, user_email, action, entity_type, entity_id, old_values, new_values, ip_address, user_agent)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `);
+  return stmt.run(
+    data.user_id ?? null,
+    data.user_email ?? null,
+    data.action,
+    data.entity_type,
+    data.entity_id ?? null,
+    data.old_values ? JSON.stringify(data.old_values) : null,
+    data.new_values ? JSON.stringify(data.new_values) : null,
+    data.ip_address ?? null,
+    data.user_agent ?? null
+  ).lastInsertRowid;
+}
+
+export function getAuditLogs(filters = {}) {
+  const database = getDb();
+  const { limit = 100, offset = 0, user_id, entity_type, action } = filters;
+  let sql = 'SELECT * FROM audit_logs WHERE 1=1';
+  const params = [];
+  if (user_id) { sql += ' AND user_id = ?'; params.push(user_id); }
+  if (entity_type) { sql += ' AND entity_type = ?'; params.push(entity_type); }
+  if (action) { sql += ' AND action = ?'; params.push(action); }
+  sql += ' ORDER BY created_at DESC LIMIT ? OFFSET ?';
+  params.push(Math.min(Number(limit) || 100, 500), Number(offset) || 0);
+  return database.prepare(sql).all(...params);
+}
+
+export function getAuditStats() {
+  const database = getDb();
+  const today = new Date().toISOString().slice(0, 10);
+  return {
+    today: database.prepare("SELECT COUNT(*) as count FROM audit_logs WHERE date(created_at) = ?").get(today).count,
+    total: database.prepare("SELECT COUNT(*) as count FROM audit_logs").get().count,
+    byAction: database.prepare("SELECT action, COUNT(*) as count FROM audit_logs GROUP BY action").all(),
+    byEntity: database.prepare("SELECT entity_type, COUNT(*) as count FROM audit_logs GROUP BY entity_type").all(),
+    recent: database.prepare("SELECT * FROM audit_logs ORDER BY created_at DESC LIMIT 50").all(),
+  };
 }

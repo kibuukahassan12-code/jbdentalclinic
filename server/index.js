@@ -22,6 +22,11 @@ import reports from './routes/reports.js';
 import patientReports from './routes/patient-reports.js';
 import adminAuth from './routes/admin-auth.js';
 import seed from './routes/seed.js';
+import settings from './routes/settings.js';
+import communicationLogs from './routes/communication-logs.js';
+import users from './routes/users.js';
+import auditLogs from './routes/audit-logs.js';
+import search from './routes/search.js';
 import cron from 'node-cron';
 import { ensureAdmin } from './scripts/ensureAdmin.js';
 
@@ -58,6 +63,11 @@ app.use('/api/payments', requireApiKey, payments);
 app.use('/api/inventory', requireApiKey, inventory);
 app.use('/api/reports', requireApiKey, reports);
 app.use('/api/patient-reports', requireApiKey, patientReports);
+app.use('/api/settings', requireApiKey, settings);
+app.use('/api/communication-logs', requireApiKey, communicationLogs);
+app.use('/api/users', requireApiKey, users);
+app.use('/api/audit-logs', requireApiKey, auditLogs);
+app.use('/api/search', requireApiKey, search);
 app.use('/api/admin', loginLimiter, adminAuth);
 app.use('/api/seed', requireApiKey, seed);
 

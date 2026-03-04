@@ -2,7 +2,7 @@ import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { motion } from 'framer-motion';
-import { LayoutDashboard, Calendar, Users, UserCog, LogOut, Stethoscope, ClipboardList, Activity, FileText, Package, BarChart3, FileCheck, Scale } from 'lucide-react';
+import { LayoutDashboard, Calendar, Users, UserCog, LogOut, Stethoscope, ClipboardList, Activity, FileText, Package, BarChart3, FileCheck, Scale, CreditCard, Settings, Bell, Shield, History } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 const AdminDashboard = lazy(() => import('@/pages/admin/AdminDashboard'));
 const AdminAppointments = lazy(() => import('@/pages/admin/AdminAppointments'));
@@ -16,6 +16,14 @@ const AdminInventory = lazy(() => import('@/pages/admin/AdminInventory'));
 const AdminFinances = lazy(() => import('@/pages/admin/AdminFinances'));
 const AdminReports = lazy(() => import('@/pages/admin/AdminReports'));
 const AdminPatientReports = lazy(() => import('@/pages/admin/AdminPatientReports'));
+const AdminPayments = lazy(() => import('@/pages/admin/AdminPayments'));
+const AdminSettings = lazy(() => import('@/pages/admin/AdminSettings'));
+const AdminReminders = lazy(() => import('@/pages/admin/AdminReminders'));
+const AdminUsers = lazy(() => import('@/pages/admin/AdminUsers'));
+const AdminAuditLog = lazy(() => import('@/pages/admin/AdminAuditLog'));
+import GlobalSearch from '@/components/admin/GlobalSearch';
+import { useKeyboardShortcuts, KeyboardShortcutsHelp, KeyboardShortcutsButton } from '@/components/admin/KeyboardShortcuts';
+import { ThemeProvider, ThemeToggle } from '@/components/admin/ThemeProvider';
 
 const AdminTabLoader = () => (
   <div className="flex items-center justify-center py-20">
@@ -56,9 +64,14 @@ const TABS = [
   { id: 'dental-chart', label: 'Chart', icon: Activity },
   { id: 'invoices', label: 'Invoices', icon: FileText },
   { id: 'patient-reports', label: 'Patient Reports', icon: FileCheck },
+  { id: 'payments', label: 'Payments', icon: CreditCard },
   { id: 'inventory', label: 'Inventory', icon: Package },
   { id: 'finances', label: 'Finances', icon: Scale },
   { id: 'reports', label: 'Reports', icon: BarChart3 },
+  { id: 'reminders', label: 'Reminders', icon: Bell },
+  { id: 'settings', label: 'Settings', icon: Settings },
+  { id: 'users', label: 'Users', icon: Shield },
+  { id: 'audit', label: 'Audit Log', icon: History },
 ];
 
 const LoginForm = ({ error, loading, onLogin }) => {
@@ -172,10 +185,22 @@ const LoginForm = ({ error, loading, onLogin }) => {
 };
 
 const Admin = () => {
+  return (
+    <ThemeProvider>
+      <AdminContent />
+    </ThemeProvider>
+  );
+};
+
+const AdminContent = () => {
   const [apiKey, setApiKey] = useState(getStoredKey());
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
+
+  const { showHelp, setShowHelp } = useKeyboardShortcuts((tabId) => {
+    setActiveTab(tabId);
+  });
 
   const handleNavigate = (tabId) => {
     setActiveTab(tabId);
@@ -247,6 +272,9 @@ const Admin = () => {
                   className="h-10 w-auto object-contain"
                 />
               </Link>
+              <GlobalSearch api={api} getStoredKey={getStoredKey} />
+              <KeyboardShortcutsButton onClick={() => setShowHelp(true)} />
+              <ThemeToggle />
               <Button
                 onClick={handleLogout}
                 className="flex-shrink-0 bg-red-600 text-white hover:bg-red-700 border border-red-500 rounded-xl px-5 py-2.5 font-semibold text-sm shadow-lg"
@@ -311,6 +339,9 @@ const Admin = () => {
             {activeTab === 'patient-reports' && (
               <AdminPatientReports api={api} getStoredKey={getStoredKey} />
             )}
+            {activeTab === 'payments' && (
+              <AdminPayments api={api} getStoredKey={getStoredKey} />
+            )}
             {activeTab === 'inventory' && (
               <AdminInventory api={api} getStoredKey={getStoredKey} />
             )}
@@ -320,8 +351,21 @@ const Admin = () => {
             {activeTab === 'reports' && (
               <AdminReports api={api} getStoredKey={getStoredKey} />
             )}
+            {activeTab === 'reminders' && (
+              <AdminReminders api={api} getStoredKey={getStoredKey} />
+            )}
+            {activeTab === 'settings' && (
+              <AdminSettings api={api} getStoredKey={getStoredKey} />
+            )}
+            {activeTab === 'users' && (
+              <AdminUsers api={api} getStoredKey={getStoredKey} />
+            )}
+            {activeTab === 'audit' && (
+              <AdminAuditLog api={api} getStoredKey={getStoredKey} />
+            )}
           </Suspense>
-          </div>
+          
+          <KeyboardShortcutsHelp isOpen={showHelp} onClose={() => setShowHelp(false)} />
         </div>
       </div>
     </>
