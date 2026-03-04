@@ -112,7 +112,7 @@ try {
 }
 
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`JB Dental API server running on port ${PORT}`);
 
   setTimeout(() => {
     startReminderService();
