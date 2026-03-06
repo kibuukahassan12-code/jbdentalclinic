@@ -92,7 +92,12 @@ for (const p of possiblePaths) {
 if (frontendPath) {
   app.use(express.static(frontendPath));
   app.get('*', (req, res) => {
-    res.sendFile(path.join(frontendPath, 'index.html'));
+    const indexPath = path.join(frontendPath, 'index.html');
+    if (fs.existsSync(indexPath)) {
+      res.sendFile(indexPath);
+    } else {
+      res.status(200).send('JB Dental Clinic API running');
+    }
   });
 } else {
   app.get('/', (req, res) => {
