@@ -118,3 +118,8 @@ app.listen(PORT, '0.0.0.0', () => {
     startReminderService();
   }, 5000);
 });
+
+process.on('SIGTERM', () => {
+  console.log('SIGTERM received. Shutting down gracefully');
+  process.exit(0);
+});

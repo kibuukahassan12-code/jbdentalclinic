@@ -5,8 +5,8 @@
   "private": true,
   "scripts": {
     "dev": "vite --host :: --port 3000",
-    "start": "node server.js",
-    "build": "node tools/generate-llms.js || echo skipped && vite build",
+    "start": "node server/index.js",
+    "build": "npm install --omit=dev",
     "preview": "vite preview --host :: --port 3000",
     "lint": "eslint . --quiet",
     "server": "node server/index.js",
