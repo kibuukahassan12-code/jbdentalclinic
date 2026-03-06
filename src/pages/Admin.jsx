@@ -368,6 +368,7 @@ const AdminContent = () => {
           <KeyboardShortcutsHelp isOpen={showHelp} onClose={() => setShowHelp(false)} />
         </div>
       </div>
+    </div>
     </>
   );
 };
