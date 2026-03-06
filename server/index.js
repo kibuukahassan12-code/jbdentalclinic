@@ -38,7 +38,6 @@ const isProd = process.env.NODE_ENV === 'production';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const distPath = path.resolve(__dirname, '../dist');
 
 app.use(express.json({ limit: '1mb' }));
 app.use(
@@ -79,10 +78,21 @@ app.get('/health', (req, res) => {
   res.status(200).send('OK');
 });
 
-if (fs.existsSync(distPath)) {
-  app.use(express.static(distPath));
+// Universal frontend serving - detects build folder automatically
+let frontendPath = null;
+const possiblePaths = ['dist', 'public', 'client/build', 'build'];
+for (const p of possiblePaths) {
+  const full = path.resolve(__dirname, '..', p);
+  if (!frontendPath && fs.existsSync(full)) {
+    frontendPath = full;
+    console.log(`Frontend detected at: ${p}`);
+  }
+}
+
+if (frontendPath) {
+  app.use(express.static(frontendPath));
   app.get('*', (req, res) => {
-    res.sendFile(path.join(distPath, 'index.html'));
+    res.sendFile(path.join(frontendPath, 'index.html'));
   });
 } else {
   app.get('/', (req, res) => {
