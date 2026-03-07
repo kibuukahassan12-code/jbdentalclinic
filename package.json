@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite --host :: --port 3000",
     "start": "node server/index.js",
-    "build": "npm install --omit=dev",
+    "build": "vite build && rm -rf public && mkdir public && cp -r dist/* public/",
     "preview": "vite preview --host :: --port 3000",
     "lint": "eslint . --quiet",
     "server": "node server/index.js",
