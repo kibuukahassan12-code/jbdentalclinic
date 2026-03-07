@@ -4,13 +4,9 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "vite --host :: --port 3000",
-    "start": "node server/index.js",
-    "build": "vite build && rm -rf public && mkdir public && cp -r dist/* public/",
-    "preview": "vite preview --host :: --port 3000",
-    "lint": "eslint . --quiet",
-    "server": "node server/index.js",
-    "seed-admin": "node server/scripts/ensureAdmin.js"
+    "dev": "vite",
+    "build": "vite build",
+    "start": "node server/server.js"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.1.1",
