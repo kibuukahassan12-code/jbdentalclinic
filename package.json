@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "vite --host :: --port 3000",
-    "start": "node server/index.js",
+    "start": "npm run build && node server.js",
     "build": "npm install --omit=dev",
     "preview": "vite preview --host :: --port 3000",
     "lint": "eslint . --quiet",
