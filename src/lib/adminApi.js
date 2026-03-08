@@ -34,10 +34,15 @@ export const adminApi = {
 export const isAdminLoggedIn = () => !!sessionStorage.getItem('admin_token');
 
 export const adminLogin = (username, password) => {
-  const ADMIN_USERNAME = import.meta.env.VITE_ADMIN_USERNAME || 'admin';
-  const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || 'JBDental2024!';
-  if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
-    sessionStorage.setItem('admin_token', btoa(`${username}:${password}`));
+  const ADMIN_USERNAME = (import.meta.env.VITE_ADMIN_USERNAME || 'admin').toString().trim();
+  const ADMIN_PASSWORD = (import.meta.env.VITE_ADMIN_PASSWORD || 'JBDental2024!').toString().trim();
+  const inputUsername = (username || '').toString().trim();
+  const inputPassword = (password || '').toString().trim();
+  
+  console.log('Login attempt:', { inputUsername, expectedUsername: ADMIN_USERNAME, match: inputUsername === ADMIN_USERNAME });
+  
+  if (inputUsername === ADMIN_USERNAME && inputPassword === ADMIN_PASSWORD) {
+    sessionStorage.setItem('admin_token', btoa(`${inputUsername}:${inputPassword}`));
     return true;
   }
   return false;
