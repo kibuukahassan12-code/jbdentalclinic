@@ -77,7 +77,7 @@ const Team = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.7 }}
-            className="mb-24 relative rounded-3xl overflow-hidden shadow-2xl shadow-[#7FD856]/10 border border-zinc-800"
+            className="mb-16 rounded-3xl overflow-hidden shadow-2xl shadow-[#7FD856]/10 border border-zinc-800"
           >
             <div className="aspect-w-16 aspect-h-9 md:aspect-h-6 lg:h-[600px]">
               <LazyImage 
@@ -85,17 +85,23 @@ const Team = () => {
                 alt="JB Dental Clinic Team - Dr. Paul and Staff" 
                 className="w-full h-full object-cover object-center hover:scale-105 transition-transform duration-1000"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0F0F0F] via-transparent to-transparent opacity-90 pointer-events-none">
-                <div className="absolute bottom-0 left-0 p-8 md:p-12 w-full md:w-2/3">
-                  <h3 className="text-3xl md:text-4xl font-bold mb-4 font-['Poppins']">
-                    A Family Treating Families
-                  </h3>
-                  <p className="text-gray-300 text-lg leading-relaxed">
-                    At JB Dental, we aren't just colleagues; we are a family of passionate professionals dedicated to serving the Makindye community. Our cohesive team environment translates directly into better, more coordinated care for you.
-                  </p>
-                </div>
-              </div>
             </div>
+          </motion.div>
+
+          {/* Text Section - Below Image */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="mb-24 text-center max-w-4xl mx-auto"
+          >
+            <h3 className="text-3xl md:text-4xl font-bold mb-6 font-['Poppins']">
+              A Family Treating Families
+            </h3>
+            <p className="text-gray-300 text-lg leading-relaxed">
+              At JB Dental, we aren't just colleagues; we are a family of passionate professionals dedicated to serving the Makindye community. Our cohesive team environment translates directly into better, more coordinated care for you.
+            </p>
           </motion.div>
 
           {/* Team Introduction */}
