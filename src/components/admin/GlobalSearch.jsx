@@ -27,21 +27,6 @@ export default function GlobalSearch({ api, getStoredKey, onResultSelect }) {
   const inputRef = useRef(null);
   const containerRef = useRef(null);
 
-  // Keyboard shortcut: Ctrl/Cmd + K
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault();
-        setIsOpen(true);
-      }
-      if (e.key === 'Escape') {
-        setIsOpen(false);
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
-
   // Focus input when opened
   useEffect(() => {
     if (isOpen) {
@@ -84,7 +69,6 @@ export default function GlobalSearch({ api, getStoredKey, onResultSelect }) {
     setResults(null);
   };
 
-  // Keyboard navigation
   const handleKeyDown = (e) => {
     if (!results) return;
     
@@ -96,13 +80,7 @@ export default function GlobalSearch({ api, getStoredKey, onResultSelect }) {
       ...results.treatments,
     ];
 
-    if (e.key === 'ArrowDown') {
-      e.preventDefault();
-      setSelectedIndex(prev => Math.min(prev + 1, allResults.length - 1));
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault();
-      setSelectedIndex(prev => Math.max(prev - 1, 0));
-    } else if (e.key === 'Enter') {
+    if (e.key === 'Enter') {
       e.preventDefault();
       const selected = allResults[selectedIndex];
       if (selected) handleSelect(selected);
@@ -129,8 +107,7 @@ export default function GlobalSearch({ api, getStoredKey, onResultSelect }) {
         className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-gray-400 hover:text-white hover:bg-white/10 transition-colors text-sm"
       >
         <Search size={16} />
-        <span className="hidden sm:inline">Search...</span>
-        <span className="hidden md:inline text-xs bg-white/10 px-1.5 py-0.5 rounded">Ctrl K</span>
+        <span>Search...</span>
       </button>
     );
   }
@@ -395,14 +372,7 @@ export default function GlobalSearch({ api, getStoredKey, onResultSelect }) {
 
           {/* Footer */}
           <div className="flex items-center justify-between px-4 py-3 border-t border-white/10 bg-white/5 text-xs text-gray-500">
-            <div className="flex items-center gap-4">
-              <span className="flex items-center gap-1">
-                <span className="bg-white/10 px-1.5 py-0.5 rounded">↑↓</span> Navigate
-              </span>
-              <span className="flex items-center gap-1">
-                <span className="bg-white/10 px-1.5 py-0.5 rounded">Enter</span> Select
-              </span>
-            </div>
+            <div />
             {results && (
               <span>{results.total} results found</span>
             )}

@@ -22,7 +22,6 @@ const AdminReminders = lazy(() => import('@/pages/admin/AdminReminders'));
 const AdminUsers = lazy(() => import('@/pages/admin/AdminUsers'));
 const AdminAuditLog = lazy(() => import('@/pages/admin/AdminAuditLog'));
 import GlobalSearch from '@/components/admin/GlobalSearch';
-import { useKeyboardShortcuts, KeyboardShortcutsHelp, KeyboardShortcutsButton } from '@/components/admin/KeyboardShortcuts';
 import { ThemeProvider, ThemeToggle } from '@/components/admin/ThemeProvider';
 
 const AdminTabLoader = () => (
@@ -198,10 +197,6 @@ const AdminContent = () => {
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
 
-  const { showHelp, setShowHelp } = useKeyboardShortcuts((tabId) => {
-    setActiveTab(tabId);
-  });
-
   const handleNavigate = (tabId) => {
     setActiveTab(tabId);
   };
@@ -273,7 +268,6 @@ const AdminContent = () => {
                 />
               </Link>
               <GlobalSearch api={api} getStoredKey={getStoredKey} />
-              <KeyboardShortcutsButton onClick={() => setShowHelp(true)} />
               <ThemeToggle />
               <Button
                 onClick={handleLogout}
@@ -364,8 +358,6 @@ const AdminContent = () => {
               <AdminAuditLog api={api} getStoredKey={getStoredKey} />
             )}
           </Suspense>
-          
-          <KeyboardShortcutsHelp isOpen={showHelp} onClose={() => setShowHelp(false)} />
         </div>
       </div>
     </div>
