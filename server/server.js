@@ -12,8 +12,8 @@ app.use(express.json());
 // Admin login endpoint
 app.post("/api/admin/login", (req, res) => {
   const { email, password } = req.body;
-  const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@jbdental.com';
-  const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
+  const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@jbdentalclinic.com';
+  const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '@Admin123#';
   
   if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
     const token = Buffer.from(`${email}:${Date.now()}`).toString('base64');
@@ -29,6 +29,33 @@ app.post("/api/admin/login", (req, res) => {
       error: "Invalid email or password"
     });
   }
+});
+
+// Dashboard endpoint - mock data
+app.get("/api/reports/dashboard", (req, res) => {
+  const today = new Date().toISOString().slice(0, 10);
+  const thisMonth = today.slice(0, 7);
+  
+  res.json({
+    today_appointments_count: 0,
+    today_appointments: [],
+    total_patients: 0,
+    pending_invoices_count: 0,
+    low_stock_count: 0,
+    low_stock_items: [],
+    recent_treatments: [],
+    daily_revenue: 0,
+    monthly_revenue: 0,
+    total_outstanding: 0,
+    outstanding_balances: [],
+    as_of: today,
+    month: thisMonth
+  });
+});
+
+// Health check
+app.get("/api/health", (req, res) => {
+  res.json({ ok: true });
 });
 
 app.get("/api", (req, res) => {
