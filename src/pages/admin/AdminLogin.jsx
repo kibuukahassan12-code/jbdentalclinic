@@ -4,6 +4,7 @@ import { Lock, Eye, EyeOff } from 'lucide-react';
 import { adminLogin } from '@/lib/adminApi';
 
 const AdminLogin = () => {
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState('');
@@ -11,10 +12,10 @@ const AdminLogin = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (adminLogin(password)) {
+    if (adminLogin(username, password)) {
       navigate('/admin/dashboard');
     } else {
-      setError('Incorrect password. Try again.');
+      setError('Invalid username or password. Try again.');
       setPassword('');
     }
   };
@@ -35,6 +36,18 @@ const AdminLogin = () => {
           className="bg-white/5 border border-white/10 rounded-2xl p-8 space-y-5"
         >
           <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Username</label>
+            <input
+              type="text"
+              value={username}
+              onChange={(e) => { setUsername(e.target.value); setError(''); }}
+              className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-[#7FD856] focus:ring-1 focus:ring-[#7FD856] transition-all"
+              placeholder="Enter admin username"
+              autoFocus
+            />
+          </div>
+
+          <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">Password</label>
             <div className="relative">
               <input
@@ -43,7 +56,6 @@ const AdminLogin = () => {
                 onChange={(e) => { setPassword(e.target.value); setError(''); }}
                 className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 pr-12 text-white placeholder-gray-500 focus:outline-none focus:border-[#7FD856] focus:ring-1 focus:ring-[#7FD856] transition-all"
                 placeholder="Enter admin password"
-                autoFocus
               />
               <button
                 type="button"
@@ -65,7 +77,7 @@ const AdminLogin = () => {
         </form>
 
         <p className="text-center text-gray-600 text-xs mt-6">
-          Default password: <span className="text-gray-400">drjb2024</span> — set <code className="text-[#7FD856]">VITE_ADMIN_PASSWORD</code> env var to override
+          Default: <span className="text-gray-400">admin / JBDental2024!</span> — set <code className="text-[#7FD856]">VITE_ADMIN_USERNAME</code> and <code className="text-[#7FD856]">VITE_ADMIN_PASSWORD</code> env vars to override
         </p>
       </div>
     </div>

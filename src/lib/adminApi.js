@@ -33,10 +33,11 @@ export const adminApi = {
 
 export const isAdminLoggedIn = () => !!sessionStorage.getItem('admin_token');
 
-export const adminLogin = (password) => {
-  const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || 'drjb2024';
-  if (password === ADMIN_PASSWORD) {
-    sessionStorage.setItem('admin_token', btoa(password));
+export const adminLogin = (username, password) => {
+  const ADMIN_USERNAME = import.meta.env.VITE_ADMIN_USERNAME || 'admin';
+  const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || 'JBDental2024!';
+  if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+    sessionStorage.setItem('admin_token', btoa(`${username}:${password}`));
     return true;
   }
   return false;
