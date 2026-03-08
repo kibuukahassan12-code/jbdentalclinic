@@ -1,13 +1,14 @@
 {
   "name": "jb-dental-clinic",
-  "type": "module",
   "version": "1.0.0",
   "private": true,
+
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "start": "node server/server.js"
   },
+
   "dependencies": {
     "@radix-ui/react-slot": "^1.1.1",
     "@radix-ui/react-toast": "^1.2.4",
@@ -32,9 +33,11 @@
     "tailwindcss-animate": "^1.0.7",
     "web-vitals": "^3.5.0"
   },
+
   "engines": {
     "node": ">=18"
   },
+
   "devDependencies": {
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
