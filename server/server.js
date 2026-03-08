@@ -9,6 +9,28 @@ app.use(express.json());
 
 /* ---------------- API ROUTES ---------------- */
 
+// Admin login endpoint
+app.post("/api/admin/login", (req, res) => {
+  const { email, password } = req.body;
+  const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@jbdental.com';
+  const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
+  
+  if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+    const token = Buffer.from(`${email}:${Date.now()}`).toString('base64');
+    res.json({
+      success: true,
+      token: token,
+      apiKey: token,
+      message: "Login successful"
+    });
+  } else {
+    res.status(401).json({
+      success: false,
+      error: "Invalid email or password"
+    });
+  }
+});
+
 app.get("/api", (req, res) => {
   res.json({
     message: "JB Dental Clinic API running"
