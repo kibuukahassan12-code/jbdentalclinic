@@ -7,8 +7,11 @@ services:
     routes:
       - path: /
     healthcheck:
-      path: /health
+      path: /api/health
       port: 8000
+    env:
+      - name: DATABASE_PATH
+        value: /app/data/appointments.db
     build:
       command: npm ci && npm run build
     run:
