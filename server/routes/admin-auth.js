@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { getDb } from '../db.js';
 import { JWT_SECRET, JWT_EXPIRY } from '../config/admin.js';
+import { writeAuditLog } from '../lib/audit.js';
 
 const router = Router();
 
@@ -29,11 +30,23 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid email or password' });
     }
 
+    if (String(user.role || '').toLowerCase() !== 'admin') {
+      return res.status(403).json({ error: 'Admin access is required for this login.' });
+    }
+
     const token = jwt.sign(
       { sub: user.email, role: user.role, userId: user.id },
       JWT_SECRET,
       { expiresIn: JWT_EXPIRY }
     );
+
+    writeAuditLog(req, {
+      action: 'LOGIN',
+      entity_type: 'user',
+      entity_id: user.id,
+      actor: { user_id: user.id, user_email: user.email },
+      new_values: { role: user.role },
+    });
 
     res.json({ success: true, token, expiresIn: JWT_EXPIRY });
   } catch (err) {

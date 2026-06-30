@@ -10,7 +10,7 @@ const PediatricDentistry = () => {
       description="Gentle, child-friendly dental care aimed at creating positive experiences for our youngest patients. We build trust and teach healthy habits that last a lifetime, from the first tooth to adolescence."
       images={[
         {
-          src: "https://horizons-cdn.hostinger.com/389eff78-3123-445d-bf00-9ef97ab253ec/67bb6ed8e3160aaa09a03dfe2cbbd59b.jpg",
+          src: "/images/pediatric-dentistry.jpg",
           alt: "Child in dental chair with purple toothbrush"
         },
         {

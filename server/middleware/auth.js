@@ -28,3 +28,29 @@ export function requireApiKey(req, res, next) {
 
   return res.status(401).json({ error: 'Invalid or expired token' });
 }
+
+function normalizeRoles(roles) {
+  return roles
+    .flat()
+    .map((role) => String(role || '').trim().toLowerCase())
+    .filter(Boolean);
+}
+
+export function requireRoles(...allowedRoles) {
+  const normalizedRoles = normalizeRoles(allowedRoles);
+
+  return (req, res, next) => {
+    if (!req.user?.role) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    const currentRole = String(req.user.role).trim().toLowerCase();
+    if (!normalizedRoles.includes(currentRole)) {
+      return res.status(403).json({ error: 'Insufficient permissions' });
+    }
+
+    next();
+  };
+}
+
+export const requireAdmin = requireRoles('admin');

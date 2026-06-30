@@ -10,13 +10,13 @@ const Periodontics = () => {
       description="Periodontal therapy to combat gum inflammation and disease. We help you maintain healthy gums which are the foundation of a healthy smile, treating everything from gingivitis to advanced periodontitis."
       images={[
         {
-          src: "https://horizons-cdn.hostinger.com/389eff78-3123-445d-bf00-9ef97ab253ec/e5f303cc0976e59d4d9f5d4dadd5a739.jpg",
-          alt: "Close-up intraoral view showing severe gum disease with inflamed dark gums and visible tooth damage."
+          src: '/images/periodontics.png',
+          alt: 'Close-up intraoral view showing severe gum disease with inflamed gums and visible plaque buildup at JB Dental Clinic',
         },
         {
-          src: "https://horizons-cdn.hostinger.com/389eff78-3123-445d-bf00-9ef97ab253ec/e70ce134873ec196739c20ec57e2bdaf.jpg",
-          alt: "Intraoral view showing advanced gum disease with missing teeth and severe gum inflammation."
-        }
+          src: '/images/periodontics.png',
+          alt: 'Clinical view of advanced periodontal disease with swollen gums requiring professional gum disease treatment',
+        },
       ]}
       procedure={[
         { title: "Evaluation", desc: "Measuring gum pocket depths to assess disease severity." },

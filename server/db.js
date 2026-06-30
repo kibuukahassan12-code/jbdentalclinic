@@ -44,6 +44,13 @@ export function getDb() {
   return db;
 }
 
+export function closeDb() {
+  if (db) {
+    db.close();
+    db = undefined;
+  }
+}
+
 function migrate(database) {
   database.exec(`
     CREATE TABLE IF NOT EXISTS appointments (

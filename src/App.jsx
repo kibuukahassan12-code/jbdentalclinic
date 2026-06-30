@@ -1,6 +1,6 @@
 
-import React, { Suspense, lazy } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import React, { Suspense, lazy, useEffect, useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
@@ -8,6 +8,7 @@ import LocalBusinessSchema from '@/components/LocalBusinessSchema';
 import { Toaster } from '@/components/ui/toaster';
 import { Loader2 } from 'lucide-react';
 import ErrorBoundary from '@/components/ErrorBoundary';
+import IntroSplash from '@/components/IntroSplash';
 
 // Eager load core pages for better LCP
 import Home from '@/pages/Home';
@@ -45,15 +46,40 @@ const PageLoader = () => (
   </div>
 );
 
-function App() {
+const INTRO_SPLASH_DURATION_MS = 950;
+
+function AppShell() {
+  const location = useLocation();
+  const isAdminRoute = location.pathname.startsWith('/admin');
+  const shouldShowSplashForRoute = !isAdminRoute;
+  const [showIntroSplash, setShowIntroSplash] = useState(false);
+  const [hasPlayedIntroSplash, setHasPlayedIntroSplash] = useState(false);
+
+  useEffect(() => {
+    if (!shouldShowSplashForRoute || hasPlayedIntroSplash) {
+      setShowIntroSplash(false);
+      return;
+    }
+
+    setShowIntroSplash(true);
+    setHasPlayedIntroSplash(true);
+
+    const timer = window.setTimeout(() => {
+      setShowIntroSplash(false);
+    }, INTRO_SPLASH_DURATION_MS);
+
+    return () => window.clearTimeout(timer);
+  }, [hasPlayedIntroSplash, shouldShowSplashForRoute]);
+
   return (
-    <Router>
+    <>
       <Helmet>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
       </Helmet>
       <div className="min-h-screen bg-[#0F0F0F] text-white">
+        <IntroSplash visible={showIntroSplash} />
         <a
           href="#main-content"
           className="absolute -left-[9999px] z-[100] px-4 py-2 bg-[#7FD856] text-black font-semibold rounded-lg focus:left-4 focus:top-4 focus:outline-none focus:ring-2 focus:ring-white"
@@ -73,7 +99,7 @@ function App() {
             <Route path="/contact" element={<Contact />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />
-            <Route path="/admin" element={<Admin />} />
+            <Route path="/admin/*" element={<Admin />} />
             <Route path="/appointment" element={<Appointment />} />
             
             {/* Service Detail Routes */}
@@ -98,6 +124,14 @@ function App() {
         <Footer />
         <Toaster />
       </div>
+    </>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <AppShell />
     </Router>
   );
 }

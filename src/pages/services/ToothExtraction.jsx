@@ -10,7 +10,7 @@ const ToothExtraction = () => {
       description="Safe and gentle removal of problematic teeth, including wisdom teeth. While we strive to save every tooth, sometimes extraction is necessary for the overall health of your mouth."
       images={[
         {
-          src: "https://horizons-cdn.hostinger.com/389eff78-3123-445d-bf00-9ef97ab253ec/fc7a926062baa6a3e9e5d391b0184212.jpg",
+          src: "/images/tooth-extraction.jpg",
           alt: "A smiling female patient sitting in a modern dental chair in a bright, welcoming dental clinic with professional lighting overhead, stone accent wall, and white cabinetry in the background. The patient appears happy and comfortable during a dental visit."
         },
         {

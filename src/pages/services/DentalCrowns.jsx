@@ -10,12 +10,14 @@ const DentalCrowns = () => {
       description="Custom-crafted caps that cover damaged teeth to restore their shape, size, strength, and appearance. We use high-quality materials that mimic the look and feel of natural enamel."
       images={[
         {
-          src: "https://horizons-cdn.hostinger.com/389eff78-3123-445d-bf00-9ef97ab253ec/8112f43c77132fba291669b2313eb14a.jpg",
-          alt: "Close-up product view of dental crown prosthetics"
+          src: "/images/dental-crowns.png",
+          alt: "3D-printed dental crown and bridge models used for custom restorative dentistry at JB Dental Clinic",
+          objectPosition: "center center"
         },
         {
-          src: "https://horizons-cdn.hostinger.com/389eff78-3123-445d-bf00-9ef97ab253ec/b66b11b6a26d22cf9a2da4abcde36ad4.jpg",
-          alt: "Educational diagram showing types of crowns"
+          src: "/images/dental-crowns.png",
+          alt: "Precision dental crown models on a dental arch showing restorative tooth replacement at JB Dental Clinic",
+          objectPosition: "right center"
         }
       ]}
       procedure={[

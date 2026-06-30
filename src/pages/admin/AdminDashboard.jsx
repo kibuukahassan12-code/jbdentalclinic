@@ -8,8 +8,6 @@ import {
 import { Button } from '@/components/ui/button';
 import SectionHeader from '@/components/SectionHeader';
 
-const API_BASE = import.meta.env.VITE_API_URL || '';
-
 export default function AdminDashboard({ api, getStoredKey, onNavigate }) {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -26,9 +24,7 @@ export default function AdminDashboard({ api, getStoredKey, onNavigate }) {
         setLoading(true);
         setError('');
         try {
-            const res = await fetch(`${API_BASE}/api/reports/dashboard`, {
-                headers: { 'X-Api-Key': key }
-            });
+            const res = await api('/api/reports/dashboard');
             if (!res.ok) {
                 const errData = await res.json().catch(() => ({}));
                 setError(errData.error || 'Failed to load dashboard');
@@ -41,7 +37,7 @@ export default function AdminDashboard({ api, getStoredKey, onNavigate }) {
         } finally {
             setLoading(false);
         }
-    }, [getStoredKey]);
+    }, [api, getStoredKey]);
 
     useEffect(() => {
         loadDashboard();

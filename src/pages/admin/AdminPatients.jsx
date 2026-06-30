@@ -4,6 +4,7 @@ import { User, Phone, Mail, Calendar, FileText, AlertCircle, Plus, Trash2, Edit2
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import SectionHeader from '@/components/SectionHeader';
+import ConfirmDialog from '@/components/admin/ConfirmDialog';
 
 export default function AdminPatients({ api, getStoredKey }) {
   const [list, setList] = useState([]);
@@ -25,6 +26,7 @@ export default function AdminPatients({ api, getStoredKey }) {
   const [profile, setProfile] = useState(null);
   const [profileLoading, setProfileLoading] = useState(false);
   const [profileTreatments, setProfileTreatments] = useState([]);
+  const [patientToDelete, setPatientToDelete] = useState(null);
 
   // CSV Export helper function
   const exportToCSV = (data, filename) => {
@@ -188,12 +190,12 @@ export default function AdminPatients({ api, getStoredKey }) {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Delete this patient record?')) return;
     const key = getStoredKey();
     const res = await api(`/api/patients/${id}`, { method: 'DELETE' }, key);
     if (res.ok) {
       if (editingId === id) resetForm();
       if (profileId === id) setProfileId(null);
+      setPatientToDelete(null);
       loadList();
     } else {
       const data = await res.json().catch(() => ({}));
@@ -315,7 +317,7 @@ export default function AdminPatients({ api, getStoredKey }) {
                 variant="outline"
                 size="sm"
                 className="border-red-500/30 text-red-400"
-                onClick={() => handleDelete(profile.id)}
+                onClick={() => setPatientToDelete(profile.id)}
               >
                 <Trash2 size={16} className="mr-2" />
                 Delete
@@ -331,6 +333,14 @@ export default function AdminPatients({ api, getStoredKey }) {
 
   return (
     <>
+      <ConfirmDialog
+        open={Boolean(patientToDelete)}
+        title="Delete patient record?"
+        description="This action cannot be undone. Related records must already be removed before deletion can succeed."
+        confirmLabel="Delete patient"
+        onConfirm={() => patientToDelete && handleDelete(patientToDelete)}
+        onCancel={() => setPatientToDelete(null)}
+      />
       <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
         <SectionHeader
           title="Patients"
@@ -508,7 +518,7 @@ export default function AdminPatients({ api, getStoredKey }) {
                     variant="outline"
                     size="sm"
                     className="border-red-500/30 text-red-400 hover:bg-red-500/10"
-                    onClick={() => handleDelete(p.id)}
+                    onClick={() => setPatientToDelete(p.id)}
                   >
                     <Trash2 size={16} />
                   </Button>

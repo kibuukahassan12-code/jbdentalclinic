@@ -9,6 +9,7 @@ import {
   getDb,
 } from '../db.js';
 import { validatePatientBody } from '../middleware/validate-patient.js';
+import { writeAuditLog } from '../lib/audit.js';
 
 const router = Router();
 
@@ -42,6 +43,12 @@ router.post('/', validatePatientBody, (req, res) => {
   try {
     const id = createPatient(req.validated);
     const row = getPatientById(id);
+    writeAuditLog(req, {
+      action: 'CREATE',
+      entity_type: 'patient',
+      entity_id: id,
+      new_values: row,
+    });
     res.status(201).json(row);
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -58,6 +65,13 @@ router.put('/:id', validatePatientBody, (req, res) => {
     if (!existing) return res.status(404).json({ error: 'Patient not found' });
     updatePatient(id, req.validated);
     const row = getPatientById(id);
+    writeAuditLog(req, {
+      action: 'UPDATE',
+      entity_type: 'patient',
+      entity_id: id,
+      old_values: existing,
+      new_values: row,
+    });
     res.json(row);
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -97,6 +111,12 @@ router.delete('/:id', (req, res) => {
     }
 
     deletePatient(id);
+    writeAuditLog(req, {
+      action: 'DELETE',
+      entity_type: 'patient',
+      entity_id: id,
+      old_values: existing,
+    });
     res.status(204).send();
   } catch (e) {
     res.status(500).json({ error: e.message });

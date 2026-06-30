@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { getUsers, getUserById, createUser, updateUser, deleteUser, getUserByEmail } from '../db.js';
+import { writeAuditLog } from '../lib/audit.js';
 
 const router = Router();
 
@@ -48,6 +49,12 @@ router.post('/', async (req, res) => {
     }
     const id = await createUser({ email, password, role });
     const user = getUserById(id);
+    writeAuditLog(req, {
+      action: 'CREATE',
+      entity_type: 'user',
+      entity_id: id,
+      new_values: user,
+    });
     res.status(201).json(user);
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -64,8 +71,17 @@ router.put('/:id', async (req, res) => {
     if (role && !ROLES.includes(role)) {
       return res.status(400).json({ error: 'Invalid role. Must be one of: ' + ROLES.join(', ') });
     }
+    const before = getUserById(id);
+    if (!before) return res.status(404).json({ error: 'User not found' });
     const user = await updateUser(id, { email, password, role });
     if (!user) return res.status(404).json({ error: 'User not found' });
+    writeAuditLog(req, {
+      action: 'UPDATE',
+      entity_type: 'user',
+      entity_id: id,
+      old_values: before,
+      new_values: user,
+    });
     res.json(user);
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -86,6 +102,12 @@ router.delete('/:id', (req, res) => {
       return res.status(400).json({ error: 'Cannot delete the last admin user' });
     }
     deleteUser(id);
+    writeAuditLog(req, {
+      action: 'DELETE',
+      entity_type: 'user',
+      entity_id: id,
+      old_values: user,
+    });
     res.status(204).send();
   } catch (e) {
     res.status(500).json({ error: e.message });

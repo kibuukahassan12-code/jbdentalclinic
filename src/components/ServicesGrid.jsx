@@ -4,6 +4,7 @@ import { motion, useReducedMotion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Stethoscope, Sparkles, Activity, Hammer, Smile, Bus as Ambulance, ArrowRight } from 'lucide-react';
 import SectionHeader from '@/components/SectionHeader';
+import LazyImage from '@/components/LazyImage';
 
 const ServicesGrid = () => {
   const shouldReduceMotion = useReducedMotion();
@@ -14,47 +15,47 @@ const ServicesGrid = () => {
       title: 'General Dentistry',
       slug: 'general-dentistry',
       description: 'Comprehensive checkups, cleanings, and preventative care to keep your smile healthy and bright.',
-      image: '/images/man-lying-dentist-chair-protective-glasses-clinic_651396-1704.avif',
+      image: '/images/general-dentistry.jpg',
     },
     {
       icon: Sparkles,
       title: 'Cosmetic Dentistry',
       slug: 'cosmetic-dentistry',
       description: 'Transform your smile with veneers, bonding, and aesthetic treatments designed for you.',
-      image: '/images/man-smiling-while-female-dentist-keeping-range-fillings.jpg',
+      image: '/images/cosmetic-dentistry.jpg',
     },
     {
       icon: Activity,
       title: 'Orthodontics',
       slug: 'orthodontics',
       description: 'Straighten your teeth and correct bite issues with modern braces and clear aligners.',
-      image: '/images/FDHGJ.jpg',
+      image: '/images/orthodontics.jpg',
     },
     {
       icon: Hammer,
       title: 'Dental Implants',
       slug: 'dental-implants',
       description: 'Permanent, natural-looking solutions for missing teeth that restore function and confidence.',
-      image: '/images/GH6.jpg',
+      image: '/images/dental-implants-home.jpg',
     },
     {
       icon: Smile,
       title: 'Teeth Whitening',
       slug: 'teeth-whitening',
       description: 'Professional whitening treatments to remove stains and brighten your smile safely.',
-      image: '/images/FHFJ.jpg',
+      image: '/images/teeth-whitening-home.png',
     },
     {
       icon: Ambulance,
       title: 'Emergency Care',
       slug: 'emergency-dental',
       description: 'Immediate attention for dental emergencies including toothaches, trauma, and infections.',
-      image: '/images/KLO.jpg',
+      image: '/images/emergency-dental-home.png',
     },
   ], []);
 
   return (
-    <section className="py-20 px-4 sm:px-6 lg:px-8 bg-black/20">
+    <section id="services" className="py-20 px-4 sm:px-6 lg:px-8 bg-black/20">
       <div className="max-w-7xl mx-auto">
         <SectionHeader
           title="Our Premium Services"
@@ -79,10 +80,11 @@ const ServicesGrid = () => {
 
               {/* Image Section */}
               <div className="mb-4 w-full h-40 overflow-hidden rounded-lg">
-                <img
+                <LazyImage
                   src={service.image}
                   alt={service.title}
                   className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-300"
+                  placeholderColor="bg-zinc-900"
                 />
               </div>
 

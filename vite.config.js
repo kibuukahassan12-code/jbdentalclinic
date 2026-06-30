@@ -243,7 +243,7 @@ export default defineConfig({
 	server: {
 		cors: true,
 		headers: {
-			'Cross-Origin-Embedder-Policy': 'credentialless',
+			'Cross-Origin-Embedder-Policy': 'unsafe-none',
 		},
 		allowedHosts: true,
 		proxy: {

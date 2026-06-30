@@ -56,3 +56,26 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   filter: invert(1);
   cursor: pointer;
 }
+
+/* Hero poster slow zoom-out (Ken Burns) animation */
+@keyframes heroZoomOut {
+  0% {
+    transform: scale(1.25);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.hero-poster-zoom {
+  animation: heroZoomOut 20s ease-out forwards;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-poster-zoom {
+    animation: none;
+    transform: scale(1);
+  }
+}
+

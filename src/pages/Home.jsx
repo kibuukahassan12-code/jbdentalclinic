@@ -1,6 +1,7 @@
 import React from 'react';
 import SEO from '@/components/SEO';
 import Hero from '@/components/Hero';
+import Stories from '@/components/Stories';
 import AboutSection from '@/components/AboutSection';
 import ServicesGrid from '@/components/ServicesGrid';
 import WhyChooseUs from '@/components/WhyChooseUs';
@@ -13,11 +14,13 @@ const Home = () => {
   return (
     <>
       <SEO
-        useBrandOnly
-        description="Quality dental care in Makindye, Kampala. General dentistry, implants, orthodontics, cosmetic dentistry and emergency care. Book via WhatsApp. Your smile, our priority."
+        title="Dentist in Makindye Kampala"
+        path="/"
+        description="JB Dental Clinic in Makindye, Kampala offers general dentistry, braces, implants, cosmetic treatments, and emergency dental care. Book quickly via WhatsApp."
       />
       <div className="overflow-x-hidden">
         <Hero />
+        <Stories />
         <AboutSection />
         <ServicesGrid />
         <WhyChooseUs />

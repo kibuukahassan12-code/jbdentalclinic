@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import SectionHeader from '@/components/SectionHeader';
 import PatientReportPrint from '@/components/admin/PatientReportPrint';
 import html2pdf from 'html2pdf.js';
+import { CLINIC } from '@/lib/clinic-branding';
 
 export default function AdminPatientReports({ api, getStoredKey }) {
   const [list, setList] = useState([]);
@@ -174,7 +175,9 @@ export default function AdminPatientReports({ api, getStoredKey }) {
     container.innerHTML = `
       <div style="padding: 20px; font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; background: white;">
         <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #7FD856; padding-bottom: 20px;">
-          <img src="https://horizons-cdn.hostinger.com/389eff78-3123-445d-bf00-9ef97ab253ec/f51b96d62e1c9d03d4878cf068f6e99e.png" alt="JB Dental Clinic" style="height: 60px; margin-bottom: 10px;">
+          <div style="background: #0F0F0F; display: inline-block; padding: 10px; border-radius: 8px; margin-bottom: 10px;">
+            <img src="${CLINIC.logoUrl}" alt="${CLINIC.name}" style="height: 50px; display: block; margin: 0 auto;">
+          </div>
           <h1 style="color: #0F0F0F; margin: 0; font-size: 24px;">JB Dental Clinic</h1>
           <p style="margin: 5px 0; color: #666;">For All Your Dental Solutions</p>
           <p style="margin: 10px 0 5px; color: #666; font-size: 12px;">Makindye, opposite Climax Bar, Kampala, Uganda</p>

@@ -26,11 +26,13 @@ export default function AppointmentInvoice({
         <div className="bg-white text-black p-8 max-w-2xl mx-auto font-sans print:p-4">
             {/* Header with Clinic Branding */}
             <div className="text-center border-b-2 border-[#7FD856] pb-6 mb-6">
-                <img
-                    src={CLINIC.logoUrl}
-                    alt={CLINIC.name}
-                    className="h-20 w-auto object-contain mx-auto mb-3"
-                />
+                <div className="bg-[#0F0F0F] inline-block p-2 rounded-lg mb-3">
+                    <img
+                        src={CLINIC.logoUrl}
+                        alt={CLINIC.name}
+                        className="h-16 w-auto object-contain mx-auto"
+                    />
+                </div>
                 <h1 className="text-2xl font-bold text-[#0F0F0F] mb-1">{CLINIC.name}</h1>
                 <p className="text-sm text-gray-700 font-medium">{CLINIC.tagline}</p>
                 <p className="text-xs text-gray-600 mt-2">{CLINIC.address}</p>

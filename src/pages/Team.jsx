@@ -81,7 +81,7 @@ const Team = () => {
           >
             <div className="aspect-w-16 aspect-h-9 md:aspect-h-6 lg:h-[600px]">
               <LazyImage 
-                src="https://horizons-cdn.hostinger.com/389eff78-3123-445d-bf00-9ef97ab253ec/ae6051839c5f3c32034cb4843e81a241.jpg" 
+                src={`https://horizons-cdn.hostinger.com/389eff78-3123-445d-bf00-9ef97ab253ec/ae6051839c5f3c32034cb4843e81a241.jpg?v=${Date.now()}`}
                 alt="JB Dental Clinic Team - Dr. Paul and Staff" 
                 className="w-full h-full object-cover object-center hover:scale-105 transition-transform duration-1000"
               />

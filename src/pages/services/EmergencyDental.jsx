@@ -10,13 +10,13 @@ const EmergencyDental = () => {
       description="Immediate attention for dental emergencies including severe pain, broken teeth, or trauma. We prioritize urgent cases to relieve your pain fast and save your teeth."
       images={[
         {
-          src: "https://horizons-cdn.hostinger.com/389eff78-3123-445d-bf00-9ef97ab253ec/e06623f28f171cd4d4b180adf49e7625.jpg",
-          alt: "Close-up of a patient with a bright smile during a dental examination with a dentist wearing blue gloves using dental instruments."
+          src: '/images/emergency-dental.png',
+          alt: 'Dentist examining a patient with jaw pain during an emergency dental visit at JB Dental Clinic',
         },
         {
-          src: "https://horizons-cdn.hostinger.com/389eff78-3123-445d-bf00-9ef97ab253ec/3614a7f3e5636d0ce3b9a9a287495ebd.jpg",
-          alt: "Patient in a dental chair wearing blue protective bib with a dentist in blue gloves performing a dental procedure, showing professional emergency dental care treatment."
-        }
+          src: '/images/emergency-dental.png',
+          alt: 'Patient receiving urgent dental care in the JB Dental Clinic treatment room with X-ray on screen',
+        },
       ]}
       procedure={[
         { title: "Rapid Triage", desc: "Quick assessment to identify the source of pain or trauma." },

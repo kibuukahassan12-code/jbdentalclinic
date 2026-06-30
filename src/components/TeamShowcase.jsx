@@ -2,16 +2,18 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { CheckCircle2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 import LazyImage from '@/components/LazyImage';
 
 const TeamShowcase = () => {
   return (
-    <section className="py-20 px-4 sm:px-6 lg:px-8 bg-zinc-900/50 relative overflow-hidden">
+    <section className="relative overflow-hidden bg-zinc-900/50 px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
       {/* Decorative background glow */}
       <div className="absolute right-0 bottom-0 w-1/3 h-full bg-[#7FD856]/5 blur-[120px] pointer-events-none"></div>
 
       <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+        <div className="grid grid-cols-1 items-center gap-8 sm:gap-12 lg:grid-cols-2 lg:gap-16">
           
           {/* Image Column */}
           <motion.div
@@ -24,7 +26,7 @@ const TeamShowcase = () => {
             <div className="absolute -inset-4 bg-gradient-to-r from-[#7FD856]/20 to-transparent rounded-2xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-zinc-800 group-hover:border-[#7FD856]/30 transition-all duration-500">
               <LazyImage
-                src="https://horizons-cdn.hostinger.com/389eff78-3123-445d-bf00-9ef97ab253ec/9f9841477ad13c65f51a140f74192a6e.jpg"
+                src="/images/hero-carousel-2.png"
                 alt="The professional dental team at JB Dental Clinic"
                 className="w-full h-auto object-cover transform group-hover:scale-105 transition-transform duration-700"
               />
@@ -47,17 +49,17 @@ const TeamShowcase = () => {
               Meet Our Team
             </div>
 
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6 leading-tight" style={{ fontFamily: "'Poppins', sans-serif" }}>
+            <h2 className="mb-5 text-3xl font-bold leading-tight text-white sm:mb-6 md:text-4xl lg:text-5xl" style={{ fontFamily: "'Poppins', sans-serif" }}>
               Dedicated to Your <br />
               <span className="text-[#7FD856]">Perfect Smile</span>
             </h2>
 
-            <p className="text-gray-300 text-lg leading-relaxed mb-6 font-light">
-              Welcome to JB Dental Clinic. We are more than just a dental practice; we are a family of passionate professionals committed to redefining your dental experience. 
+            <p className="mb-4 text-base leading-relaxed text-gray-300 sm:mb-6 sm:text-lg">
+              Our team combines specialist skill, empathy, and clear communication so you always understand your treatment options and next steps.
             </p>
 
-            <p className="text-gray-400 leading-relaxed mb-8">
-              Our diverse team brings together years of international experience and local expertise. We believe that exceptional care starts with listening. From the moment you walk through our doors, our goal is to make you feel comfortable, understood, and confident in your treatment plan. We combine cutting-edge technology with a gentle, human touch to ensure the best possible outcomes for you and your loved ones.
+            <p className="mb-6 leading-relaxed text-gray-400 sm:mb-8">
+              From reception to clinical care, we are committed to a calm, professional experience built around your comfort and long-term oral health.
             </p>
 
             <div className="space-y-4">
@@ -72,14 +74,24 @@ const TeamShowcase = () => {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: 0.4 + (index * 0.1) }}
-                  className="flex items-center gap-3"
+                  className="flex items-center gap-2.5 sm:gap-3"
                 >
-                  <div className="flex-shrink-0 w-6 h-6 rounded-full bg-[#7FD856]/20 flex items-center justify-center">
-                    <CheckCircle2 size={14} className="text-[#7FD856]" />
+                  <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-[#7FD856]/20">
+                    <CheckCircle2 size={13} className="text-[#7FD856]" />
                   </div>
-                  <span className="text-gray-200">{item}</span>
+                  <span className="text-sm text-gray-200 sm:text-base">{item}</span>
                 </motion.div>
               ))}
+            </div>
+            <div className="mt-6 sm:mt-8">
+              <Link to="/team">
+                <Button
+                  variant="outline"
+                  className="w-full border-white/20 px-6 py-3 font-semibold text-white hover:bg-white hover:text-black sm:w-auto"
+                >
+                  Meet Full Team
+                </Button>
+              </Link>
             </div>
           </motion.div>
 

@@ -28,7 +28,7 @@ const BridalDentistry = () => {
       benefits: "Custom roadmap to your perfect look",
       timeline: "3-6 months before",
       icon: Calendar,
-      image: "https://horizons-cdn.hostinger.com/389eff78-3123-445d-bf00-9ef97ab253ec/561f6e3cc166d92883f00374ff5cf30b.jpg" // Updated image for Pre-wedding Smile Assessment
+      image: "/images/pre-wedding-smile.jpg"
     },
     {
       title: "Professional Bridal Whitening",
@@ -110,7 +110,7 @@ const BridalDentistry = () => {
       date: "Wedding: Dec 2024",
       quote: "I was so self-conscious about my gap. JB Dental fixed it in two visits! My wedding photos are absolutely perfect.",
       rating: 5,
-      image: "https://horizons-cdn.hostinger.com/389eff78-3123-445d-bf00-9ef97ab253ec/fcddfcec326db091c6c42563cf568fdb.jpg" 
+      image: "/images/cosmetic-dentistry.jpg" 
     },
     {
       name: "Grace K.",
@@ -141,10 +141,10 @@ const BridalDentistry = () => {
         <div className="relative min-h-screen flex items-center justify-center overflow-hidden py-20 lg:py-0">
           <div className="absolute inset-0 z-0 bg-[#0F0F0F]">
             <LazyImage 
-              src="https://horizons-cdn.hostinger.com/389eff78-3123-445d-bf00-9ef97ab253ec/fcddfcec326db091c6c42563cf568fdb.jpg" 
-              alt="Beautiful African Bride with Radiant Smile and Gold Jewelry" 
+              src="/images/bridal-dentistry.jpg" 
+              alt="Beautiful African Bride receiving dental care at JB Dental Clinic" 
               className="w-full h-full"
-              objectFit="contain"
+              objectFit="cover"
               objectPosition="center top"
             />
             {/* Darken left and bottom for text; keep right (face) area clear */}
@@ -221,8 +221,8 @@ const BridalDentistry = () => {
             >
               <div className="absolute inset-0 bg-gradient-to-tr from-[#7FD856]/20 to-transparent rounded-3xl rotate-3 transform transition-transform group-hover:rotate-0"></div>
               <LazyImage 
-                src="https://horizons-cdn.hostinger.com/389eff78-3123-445d-bf00-9ef97ab253ec/ac43370b3805a6abaff3f1baa1d29c51.jpg" 
-                alt="African couple in elegant white wedding attire with beautiful smiles" 
+                src="/images/bridal-dentistry.jpg" 
+                alt="African bride in lace gown receiving bridal dental consultation at JB Dental Clinic" 
                 className="relative z-10 rounded-3xl shadow-2xl w-full h-[500px]"
               />
             </motion.div>

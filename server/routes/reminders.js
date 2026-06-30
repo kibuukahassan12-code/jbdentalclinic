@@ -16,11 +16,48 @@ import {
 
 const router = Router();
 
+const INSFORGE_URL = process.env.VITE_INSFORGE_URL || '';
+const ANON_KEY = process.env.VITE_INSFORGE_ANON_KEY || '';
+
+const isInsForge = () => !!INSFORGE_URL && !!ANON_KEY;
+
+async function getInsForgeRecords(table, queryStr = '') {
+  const url = `${INSFORGE_URL}/api/database/records/${table}${queryStr ? '?' + queryStr : ''}`;
+  const res = await fetch(url, {
+    headers: {
+      'Authorization': `Bearer ${ANON_KEY}`,
+      'Content-Type': 'application/json'
+    }
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`InsForge error: ${res.statusText} - ${text}`);
+  }
+  return res.json();
+}
+
+async function updateInsForgeRecord(table, id, body) {
+  const url = `${INSFORGE_URL}/api/database/records/${table}?id=eq.${id}`;
+  const res = await fetch(url, {
+    method: 'PATCH',
+    headers: {
+      'Authorization': `Bearer ${ANON_KEY}`,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=representation'
+    },
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`InsForge update error: ${res.statusText} - ${text}`);
+  }
+  return res.json();
+}
+
 /**
  * Mark which type of reminder was sent
  */
-function markReminderSent(appointmentId, reminderType) {
-  const db = getDb();
+async function markReminderSent(appointmentId, reminderType) {
   const column = {
     thank_you: 'thank_you_sent_at',
     '1day': 'reminder_1day_sent_at',
@@ -30,6 +67,14 @@ function markReminderSent(appointmentId, reminderType) {
 
   if (!column) throw new Error('Invalid reminder type');
 
+  if (isInsForge()) {
+    return updateInsForgeRecord('appointments', appointmentId, {
+      [column]: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    });
+  }
+
+  const db = getDb();
   const stmt = db.prepare(`
     UPDATE appointments 
     SET ${column} = datetime('now'), updated_at = datetime('now') 
@@ -38,8 +83,7 @@ function markReminderSent(appointmentId, reminderType) {
   return stmt.run(appointmentId);
 }
 
-function markEmailReminderSent(appointmentId, reminderType) {
-  const db = getDb();
+async function markEmailReminderSent(appointmentId, reminderType) {
   const column = {
     thank_you: 'thank_you_email_sent_at',
     '1day': 'reminder_1day_email_sent_at',
@@ -49,6 +93,14 @@ function markEmailReminderSent(appointmentId, reminderType) {
 
   if (!column) throw new Error('Invalid reminder type');
 
+  if (isInsForge()) {
+    return updateInsForgeRecord('appointments', appointmentId, {
+      [column]: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    });
+  }
+
+  const db = getDb();
   const stmt = db.prepare(`
     UPDATE appointments 
     SET ${column} = datetime('now'), updated_at = datetime('now') 
@@ -57,7 +109,20 @@ function markEmailReminderSent(appointmentId, reminderType) {
   return stmt.run(appointmentId);
 }
 
-function getAppointmentEmail(apt) {
+async function getAppointmentEmail(apt) {
+  if (isInsForge()) {
+    const pid = apt.patient_id != null ? Number(apt.patient_id) : null;
+    if (pid) {
+      const patients = await getInsForgeRecords('patients', `id=eq.${pid}`);
+      if (patients && patients[0]?.email) return String(patients[0].email).trim();
+    }
+    if (apt.patient_phone) {
+      const patients = await getInsForgeRecords('patients', `phone=eq.${apt.patient_phone}`);
+      if (patients && patients[0]?.email) return String(patients[0].email).trim();
+    }
+    return null;
+  }
+
   const db = getDb();
   const pid = apt.patient_id != null ? Number(apt.patient_id) : null;
   const phone = apt.patient_phone ? String(apt.patient_phone) : null;
@@ -80,6 +145,37 @@ function getAppointmentEmail(apt) {
  * With retry logic for failed messages
  */
 export async function sendThankYouMessages() {
+  if (isInsForge()) {
+    try {
+      const appointments = await getInsForgeRecords('appointments', 'status=neq.Cancelled&limit=100');
+      const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
+      const pendingThankYou = appointments.filter(apt => {
+        return (!apt.thank_you_sent_at || apt.thank_you_sent_at === '') &&
+               new Date(apt.created_at) >= yesterday;
+      });
+
+      const results = { sent: 0, failed: [], retried: 0 };
+      for (const apt of pendingThankYou) {
+        try {
+          await sendThankYouMessage(
+            apt.patient_phone,
+            apt.patient_name,
+            apt.appointment_date,
+            apt.appointment_time
+          );
+          await markReminderSent(apt.id, 'thank_you');
+          results.sent += 1;
+        } catch (e) {
+          results.failed.push({ id: apt.id, type: 'thank_you', error: e.message, patient: apt.patient_name });
+        }
+      }
+      return results;
+    } catch (err) {
+      console.error('Error in sendThankYouMessages (InsForge):', err);
+      return { sent: 0, failed: [{ error: err.message }] };
+    }
+  }
+
   const db = getDb();
   // Get appointments created within last hour that haven't received thank you message
   // Also retry appointments where thank you failed (created within last 24 hours)
@@ -112,6 +208,51 @@ export async function sendThankYouMessages() {
 }
 
 export async function send6HourEmailReminders() {
+  if (isInsForge()) {
+    try {
+      const now = new Date();
+      const todayStr = now.toISOString().slice(0, 10);
+      const in6Hours = new Date(now.getTime() + 6 * 60 * 60 * 1000);
+      const windowStart = new Date(in6Hours.getTime() - 30 * 60 * 1000);
+      const windowEnd = new Date(in6Hours.getTime() + 30 * 60 * 1000);
+
+      const appointments = await getInsForgeRecords('appointments', `appointment_date=eq.${todayStr}&status=neq.Cancelled&limit=100`);
+      const pending6hEmail = appointments.filter(apt => {
+        if (apt.reminder_6h_email_sent_at) return false;
+        if (!apt.appointment_time) return false;
+        const [hours, minutes] = apt.appointment_time.split(':').map(Number);
+        const aptTime = new Date(now);
+        aptTime.setHours(hours, minutes, 0, 0);
+        return aptTime >= windowStart && aptTime <= windowEnd;
+      });
+
+      const results = { sent: 0, skipped: 0, failed: [] };
+      for (const apt of pending6hEmail) {
+        const to = await getAppointmentEmail(apt);
+        if (!to) {
+          results.skipped += 1;
+          continue;
+        }
+        try {
+          const { subject, text, html } = build6HourEmail({
+            patientName: apt.patient_name,
+            date: apt.appointment_date,
+            time: apt.appointment_time,
+          });
+          await sendEmail({ to, subject, text, html });
+          await markEmailReminderSent(apt.id, '6h');
+          results.sent += 1;
+        } catch (e) {
+          results.failed.push({ id: apt.id, type: '6h', error: e.message, email: to });
+        }
+      }
+      return results;
+    } catch (err) {
+      console.error('Error in send6HourEmailReminders (InsForge):', err);
+      return { sent: 0, skipped: 0, failed: [{ error: err.message }] };
+    }
+  }
+
   const db = getDb();
   const now = new Date();
   const in6Hours = new Date(now.getTime() + 6 * 60 * 60 * 1000);
@@ -134,7 +275,7 @@ export async function send6HourEmailReminders() {
 
   const results = { sent: 0, skipped: 0, failed: [] };
   for (const apt of appointments) {
-    const to = getAppointmentEmail(apt);
+    const to = await getAppointmentEmail(apt);
     if (!to) {
       results.skipped += 1;
       continue;
@@ -156,6 +297,42 @@ export async function send6HourEmailReminders() {
 }
 
 export async function send1DayEmailReminders() {
+  if (isInsForge()) {
+    try {
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const tomorrowStr = tomorrow.toISOString().slice(0, 10);
+
+      const appointments = await getInsForgeRecords('appointments', `appointment_date=eq.${tomorrowStr}&status=neq.Cancelled&limit=100`);
+      const pending1DayEmail = appointments.filter(apt => !apt.reminder_1day_email_sent_at);
+
+      const results = { sent: 0, skipped: 0, failed: [] };
+      for (const apt of pending1DayEmail) {
+        const to = await getAppointmentEmail(apt);
+        if (!to) {
+          results.skipped += 1;
+          continue;
+        }
+        try {
+          const { subject, text, html } = build1DayEmail({
+            patientName: apt.patient_name,
+            date: apt.appointment_date,
+            time: apt.appointment_time,
+          });
+          await sendEmail({ to, subject, text, html });
+          await markEmailReminderSent(apt.id, '1day');
+          results.sent += 1;
+        } catch (e) {
+          results.failed.push({ id: apt.id, type: '1day', error: e.message, email: to });
+        }
+      }
+      return results;
+    } catch (err) {
+      console.error('Error in send1DayEmailReminders (InsForge):', err);
+      return { sent: 0, skipped: 0, failed: [{ error: err.message }] };
+    }
+  }
+
   const db = getDb();
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
@@ -173,7 +350,7 @@ export async function send1DayEmailReminders() {
 
   const results = { sent: 0, skipped: 0, failed: [] };
   for (const apt of appointments) {
-    const to = getAppointmentEmail(apt);
+    const to = await getAppointmentEmail(apt);
     if (!to) {
       results.skipped += 1;
       continue;
@@ -195,6 +372,42 @@ export async function send1DayEmailReminders() {
 }
 
 export async function sendThankYouEmails() {
+  if (isInsForge()) {
+    try {
+      const appointments = await getInsForgeRecords('appointments', 'status=neq.Cancelled&limit=100');
+      const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
+      const pendingThankYouEmail = appointments.filter(apt => {
+        return (!apt.thank_you_email_sent_at || apt.thank_you_email_sent_at === '') &&
+               new Date(apt.created_at) >= yesterday;
+      });
+
+      const results = { sent: 0, skipped: 0, failed: [] };
+      for (const apt of pendingThankYouEmail) {
+        const to = await getAppointmentEmail(apt);
+        if (!to) {
+          results.skipped += 1;
+          continue;
+        }
+        try {
+          const { subject, text, html } = buildThankYouEmail({
+            patientName: apt.patient_name,
+            date: apt.appointment_date,
+            time: apt.appointment_time,
+          });
+          await sendEmail({ to, subject, text, html });
+          await markEmailReminderSent(apt.id, 'thank_you');
+          results.sent += 1;
+        } catch (e) {
+          results.failed.push({ id: apt.id, type: 'thank_you', error: e.message, email: to });
+        }
+      }
+      return results;
+    } catch (err) {
+      console.error('Error in sendThankYouEmails (InsForge):', err);
+      return { sent: 0, skipped: 0, failed: [{ error: err.message }] };
+    }
+  }
+
   const db = getDb();
   const stmt = db.prepare(`
     SELECT * FROM appointments
@@ -208,7 +421,7 @@ export async function sendThankYouEmails() {
 
   const results = { sent: 0, skipped: 0, failed: [] };
   for (const apt of appointments) {
-    const to = getAppointmentEmail(apt);
+    const to = await getAppointmentEmail(apt);
     if (!to) {
       results.skipped += 1;
       continue;
@@ -234,6 +447,37 @@ export async function sendThankYouEmails() {
  * With retry logic for failed messages
  */
 export async function send1DayReminders() {
+  if (isInsForge()) {
+    try {
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const tomorrowStr = tomorrow.toISOString().slice(0, 10);
+
+      const appointments = await getInsForgeRecords('appointments', `appointment_date=eq.${tomorrowStr}&status=neq.Cancelled&limit=100`);
+      const pending1Day = appointments.filter(apt => !apt.reminder_1day_sent_at);
+
+      const results = { sent: 0, failed: [] };
+      for (const apt of pending1Day) {
+        try {
+          await send1DayReminder(
+            apt.patient_phone,
+            apt.patient_name,
+            apt.appointment_date,
+            apt.appointment_time
+          );
+          await markReminderSent(apt.id, '1day');
+          results.sent += 1;
+        } catch (e) {
+          results.failed.push({ id: apt.id, type: '1day', error: e.message });
+        }
+      }
+      return results;
+    } catch (err) {
+      console.error('Error in send1DayReminders (InsForge):', err);
+      return { sent: 0, failed: [{ error: err.message }] };
+    }
+  }
+
   const db = getDb();
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
@@ -273,6 +517,46 @@ export async function send1DayReminders() {
  * With retry logic for failed messages
  */
 export async function send6HourReminders() {
+  if (isInsForge()) {
+    try {
+      const now = new Date();
+      const todayStr = now.toISOString().slice(0, 10);
+      const in6Hours = new Date(now.getTime() + 6 * 60 * 60 * 1000);
+      const windowStart = new Date(in6Hours.getTime() - 30 * 60 * 1000);
+      const windowEnd = new Date(in6Hours.getTime() + 30 * 60 * 1000);
+
+      const appointments = await getInsForgeRecords('appointments', `appointment_date=eq.${todayStr}&status=neq.Cancelled&limit=100`);
+      const pending6h = appointments.filter(apt => {
+        if (apt.reminder_6h_sent_at) return false;
+        if (!apt.appointment_time) return false;
+        const [hours, minutes] = apt.appointment_time.split(':').map(Number);
+        const aptTime = new Date(now);
+        aptTime.setHours(hours, minutes, 0, 0);
+        return aptTime >= windowStart && aptTime <= windowEnd;
+      });
+
+      const results = { sent: 0, failed: [] };
+      for (const apt of pending6h) {
+        try {
+          await send6HourReminder(
+            apt.patient_phone,
+            apt.patient_name,
+            apt.appointment_date,
+            apt.appointment_time
+          );
+          await markReminderSent(apt.id, '6h');
+          results.sent += 1;
+        } catch (e) {
+          results.failed.push({ id: apt.id, type: '6h', error: e.message });
+        }
+      }
+      return results;
+    } catch (err) {
+      console.error('Error in send6HourReminders (InsForge):', err);
+      return { sent: 0, failed: [{ error: err.message }] };
+    }
+  }
+
   const db = getDb();
   const now = new Date();
   const in6Hours = new Date(now.getTime() + 6 * 60 * 60 * 1000);
@@ -320,6 +604,46 @@ export async function send6HourReminders() {
  * With retry logic for failed messages
  */
 export async function send1HourReminders() {
+  if (isInsForge()) {
+    try {
+      const now = new Date();
+      const todayStr = now.toISOString().slice(0, 10);
+      const in1Hour = new Date(now.getTime() + 60 * 60 * 1000);
+      const windowStart = new Date(in1Hour.getTime() - 15 * 60 * 1000);
+      const windowEnd = new Date(in1Hour.getTime() + 15 * 60 * 1000);
+
+      const appointments = await getInsForgeRecords('appointments', `appointment_date=eq.${todayStr}&status=neq.Cancelled&limit=100`);
+      const pending1h = appointments.filter(apt => {
+        if (apt.reminder_1h_sent_at) return false;
+        if (!apt.appointment_time) return false;
+        const [hours, minutes] = apt.appointment_time.split(':').map(Number);
+        const aptTime = new Date(now);
+        aptTime.setHours(hours, minutes, 0, 0);
+        return aptTime >= windowStart && aptTime <= windowEnd;
+      });
+
+      const results = { sent: 0, failed: [] };
+      for (const apt of pending1h) {
+        try {
+          await send1HourReminder(
+            apt.patient_phone,
+            apt.patient_name,
+            apt.appointment_date,
+            apt.appointment_time
+          );
+          await markReminderSent(apt.id, '1h');
+          results.sent += 1;
+        } catch (e) {
+          results.failed.push({ id: apt.id, type: '1h', error: e.message });
+        }
+      }
+      return results;
+    } catch (err) {
+      console.error('Error in send1HourReminders (InsForge):', err);
+      return { sent: 0, failed: [{ error: err.message }] };
+    }
+  }
+
   const db = getDb();
   const now = new Date();
   const in1Hour = new Date(now.getTime() + 60 * 60 * 1000);
@@ -362,6 +686,51 @@ export async function send1HourReminders() {
 }
 
 export async function send1HourEmailReminders() {
+  if (isInsForge()) {
+    try {
+      const now = new Date();
+      const todayStr = now.toISOString().slice(0, 10);
+      const in1Hour = new Date(now.getTime() + 60 * 60 * 1000);
+      const windowStart = new Date(in1Hour.getTime() - 15 * 60 * 1000);
+      const windowEnd = new Date(in1Hour.getTime() + 15 * 60 * 1000);
+
+      const appointments = await getInsForgeRecords('appointments', `appointment_date=eq.${todayStr}&status=neq.Cancelled&limit=100`);
+      const pending1hEmail = appointments.filter(apt => {
+        if (apt.reminder_1h_email_sent_at) return false;
+        if (!apt.appointment_time) return false;
+        const [hours, minutes] = apt.appointment_time.split(':').map(Number);
+        const aptTime = new Date(now);
+        aptTime.setHours(hours, minutes, 0, 0);
+        return aptTime >= windowStart && aptTime <= windowEnd;
+      });
+
+      const results = { sent: 0, skipped: 0, failed: [] };
+      for (const apt of pending1hEmail) {
+        const to = await getAppointmentEmail(apt);
+        if (!to) {
+          results.skipped += 1;
+          continue;
+        }
+        try {
+          const { subject, text, html } = build1HourEmail({
+            patientName: apt.patient_name,
+            date: apt.appointment_date,
+            time: apt.appointment_time,
+          });
+          await sendEmail({ to, subject, text, html });
+          await markEmailReminderSent(apt.id, '1h');
+          results.sent += 1;
+        } catch (e) {
+          results.failed.push({ id: apt.id, type: '1h', error: e.message, email: to });
+        }
+      }
+      return results;
+    } catch (err) {
+      console.error('Error in send1HourEmailReminders (InsForge):', err);
+      return { sent: 0, skipped: 0, failed: [{ error: err.message }] };
+    }
+  }
+
   const db = getDb();
   const now = new Date();
   const in1Hour = new Date(now.getTime() + 60 * 60 * 1000);
@@ -384,7 +753,7 @@ export async function send1HourEmailReminders() {
 
   const results = { sent: 0, skipped: 0, failed: [] };
   for (const apt of appointments) {
-    const to = getAppointmentEmail(apt);
+    const to = await getAppointmentEmail(apt);
     if (!to) {
       results.skipped += 1;
       continue;
@@ -396,7 +765,7 @@ export async function send1HourEmailReminders() {
         time: apt.appointment_time,
       });
       await sendEmail({ to, subject, text, html });
-      markEmailReminderSent(apt.id, '1h');
+      await markEmailReminderSent(apt.id, '1h');
       results.sent += 1;
     } catch (e) {
       results.failed.push({ id: apt.id, type: '1h', error: e.message, email: to });

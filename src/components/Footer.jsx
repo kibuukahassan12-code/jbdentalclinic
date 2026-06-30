@@ -1,9 +1,11 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { MapPin, Phone, Mail, Clock } from 'lucide-react';
+import { CLINIC } from '@/lib/clinic-branding';
 
 const Footer = () => {
+  const location = useLocation();
   const quickLinks = [
     { name: 'Home', path: '/' },
     { name: 'Services', path: '/services' },
@@ -22,6 +24,10 @@ const Footer = () => {
     'Teeth Whitening',
   ];
 
+  if (location.pathname.startsWith('/admin')) {
+    return null;
+  }
+
 
   return (
     <footer className="bg-black/50 border-t border-white/10">
@@ -30,7 +36,7 @@ const Footer = () => {
           {/* Logo & Description */}
           <div className="space-y-4">
             <img 
-              src="https://horizons-cdn.hostinger.com/389eff78-3123-445d-bf00-9ef97ab253ec/f51b96d62e1c9d03d4878cf068f6e99e.png" 
+              src={CLINIC.logoUrl}
               alt="JB Dental Clinic Logo" 
               className="h-16 w-auto object-contain"
             />

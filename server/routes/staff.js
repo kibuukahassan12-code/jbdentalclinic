@@ -8,6 +8,7 @@ import {
   getDb,
 } from '../db.js';
 import { validateStaffBody } from '../middleware/validate-staff.js';
+import { writeAuditLog } from '../lib/audit.js';
 
 const router = Router();
 
@@ -48,6 +49,12 @@ router.post('/', validateStaffBody, (req, res) => {
   try {
     const id = createStaff(req.validated);
     const row = getStaffMemberById(id);
+    writeAuditLog(req, {
+      action: 'CREATE',
+      entity_type: 'staff',
+      entity_id: id,
+      new_values: row,
+    });
     res.status(201).json(row);
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -65,6 +72,13 @@ router.put('/:id', validateStaffBody, (req, res) => {
       return res.status(404).json({ error: 'Staff member not found' });
     updateStaff(id, req.validated);
     const row = getStaffMemberById(id);
+    writeAuditLog(req, {
+      action: 'UPDATE',
+      entity_type: 'staff',
+      entity_id: id,
+      old_values: existing,
+      new_values: row,
+    });
     res.json(row);
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -99,6 +113,12 @@ router.delete('/:id', (req, res) => {
     }
 
     deleteStaff(id);
+    writeAuditLog(req, {
+      action: 'DELETE',
+      entity_type: 'staff',
+      entity_id: id,
+      old_values: existing,
+    });
     res.status(204).send();
   } catch (e) {
     res.status(500).json({ error: e.message });

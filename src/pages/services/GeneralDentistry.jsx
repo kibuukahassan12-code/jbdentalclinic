@@ -10,7 +10,7 @@ const GeneralDentistry = () => {
       description="Comprehensive oral health maintenance including routine examinations, cleanings, and preventative strategies to ensure your smile lasts a lifetime. We focus on early detection and patient education to prevent issues before they start."
       images={[
         {
-          src: "https://horizons-cdn.hostinger.com/389eff78-3123-445d-bf00-9ef97ab253ec/9f6fb95078e83831e0f057a6d4f9ee43.jpg",
+          src: "/images/general-dentistry.jpg",
           alt: "Patient in dental chair with dentist preparing for examination",
           objectPosition: "center 20%" // Adjusted to prominently display the patient's face
         },

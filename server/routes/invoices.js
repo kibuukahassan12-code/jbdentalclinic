@@ -9,6 +9,7 @@ import {
   getDb,
 } from '../db.js';
 import { validateInvoiceBody } from '../middleware/validate-invoice.js';
+import { writeAuditLog } from '../lib/audit.js';
 
 const router = Router();
 
@@ -46,6 +47,12 @@ router.post('/', validateInvoiceBody, (req, res) => {
   try {
     const id = createInvoice(req.validated);
     const row = getInvoiceById(id);
+    writeAuditLog(req, {
+      action: 'CREATE',
+      entity_type: 'invoice',
+      entity_id: id,
+      new_values: row,
+    });
     res.status(201).json(row);
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -62,6 +69,13 @@ router.put('/:id', validateInvoiceBody, (req, res) => {
     if (!existing) return res.status(404).json({ error: 'Invoice not found' });
     updateInvoice(id, req.validated);
     const row = getInvoiceById(id);
+    writeAuditLog(req, {
+      action: 'UPDATE',
+      entity_type: 'invoice',
+      entity_id: id,
+      old_values: existing,
+      new_values: row,
+    });
     res.json(row);
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -87,6 +101,12 @@ router.delete('/:id', (req, res) => {
     }
 
     deleteInvoice(id);
+    writeAuditLog(req, {
+      action: 'DELETE',
+      entity_type: 'invoice',
+      entity_id: id,
+      old_values: existing,
+    });
     res.status(204).send();
   } catch (e) {
     res.status(500).json({ error: e.message });

@@ -6,12 +6,12 @@ import LazyImage from '@/components/LazyImage';
 
 const FounderSection = () => {
   return (
-    <section className="py-20 px-4 sm:px-6 lg:px-8 bg-black/40 relative overflow-hidden">
+    <section className="relative overflow-hidden bg-black/40 px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
       {/* Decorative Elements */}
       <div className="absolute left-0 top-1/2 -translate-y-1/2 w-64 h-64 bg-[#7FD856]/5 rounded-full blur-[100px] pointer-events-none"></div>
       
       <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+        <div className="grid grid-cols-1 items-center gap-8 sm:gap-12 lg:grid-cols-2 lg:gap-20">
           
           {/* Image Column */}
           <motion.div 
@@ -24,7 +24,7 @@ const FounderSection = () => {
             <div className="relative z-10 rounded-2xl overflow-hidden shadow-2xl border border-zinc-800 group hover:border-[#7FD856]/50 transition-all duration-500">
               <div className="aspect-[4/5] relative">
                  <LazyImage 
-                   src="https://horizons-cdn.hostinger.com/389eff78-3123-445d-bf00-9ef97ab253ec/d65d15850a56132b973fd6d4ed7a5ba5.jpg" 
+                   src="/images/hero-carousel-5.png" 
                    alt="Dr. JB Mubiru, Founder & CEO of JB Dental Clinic" 
                    className="w-full h-full object-cover object-center transform group-hover:scale-105 transition-transform duration-700"
                  />
@@ -52,48 +52,48 @@ const FounderSection = () => {
           >
             <div className="mb-6">
                <span className="inline-block px-4 py-1.5 rounded-full bg-[#7FD856]/10 text-[#7FD856] font-semibold text-sm mb-4 border border-[#7FD856]/20">
-                 Visionary Leadership
+                 Clinical Leadership
                </span>
-               <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6 leading-tight" style={{ fontFamily: "'Poppins', sans-serif" }}>
-                 Building a Legacy of <br/>
-                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#7FD856] to-emerald-400">Excellence in Dentistry</span>
+               <h2 className="mb-5 text-3xl font-bold leading-tight text-white sm:mb-6 md:text-4xl lg:text-5xl" style={{ fontFamily: "'Poppins', sans-serif" }}>
+                 Built on Trust, <br />
+                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#7FD856] to-emerald-400">Driven by Results</span>
                </h2>
             </div>
 
-            <div className="space-y-6 text-gray-300 leading-relaxed font-light text-lg">
+            <div className="space-y-4 text-sm leading-relaxed text-gray-300 sm:space-y-5 sm:text-lg">
                <p>
-                 "At JB Dental Clinic, our mission goes beyond treating teeth; it's about restoring confidence and enhancing the quality of life for every patient we serve. My journey in dentistry has always been driven by a singular passion: to merge compassionate care with the precision of modern technology."
+                 Our leadership team focuses on one promise: every patient receives clear guidance, safe treatment, and modern dental care delivered with genuine compassion.
                </p>
                <p>
-                 With over a decade of experience in the field, Dr. JB Mubiru founded this clinic to create a space where patients feel heard, valued, and safe. We believe that world-class dental care should be accessible, and we are committed to staying at the forefront of dental innovation to ensure the best possible outcomes for our community.
+                 We continuously improve our systems, training, and technology so families in Makindye and greater Kampala can access reliable, world-class dentistry close to home.
                </p>
             </div>
 
             {/* Credentials / Highlights */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-10">
-               <div className="flex items-start gap-4 p-4 rounded-xl bg-zinc-800/30 border border-zinc-800 hover:border-[#7FD856]/30 transition-colors">
-                  <div className="p-2 bg-[#7FD856]/10 rounded-lg text-[#7FD856]">
-                    <GraduationCap size={24} />
+            <div className="mt-8 grid grid-cols-1 gap-4 sm:mt-10 sm:grid-cols-2 sm:gap-6">
+               <div className="flex items-start gap-3 rounded-xl border border-zinc-800 bg-zinc-800/30 p-4 transition-colors hover:border-[#7FD856]/30 sm:gap-4">
+                  <div className="rounded-lg bg-[#7FD856]/10 p-2 text-[#7FD856]">
+                    <GraduationCap size={20} />
                   </div>
                   <div>
                     <h4 className="font-bold text-white mb-1">Expertise</h4>
-                    <p className="text-sm text-gray-400">Advanced Clinical Dentistry & Oral Surgery</p>
+                    <p className="text-sm text-gray-400">General, restorative, and advanced clinical dentistry</p>
                   </div>
                </div>
 
-               <div className="flex items-start gap-4 p-4 rounded-xl bg-zinc-800/30 border border-zinc-800 hover:border-[#7FD856]/30 transition-colors">
-                  <div className="p-2 bg-[#7FD856]/10 rounded-lg text-[#7FD856]">
-                    <Award size={24} />
+               <div className="flex items-start gap-3 rounded-xl border border-zinc-800 bg-zinc-800/30 p-4 transition-colors hover:border-[#7FD856]/30 sm:gap-4">
+                  <div className="rounded-lg bg-[#7FD856]/10 p-2 text-[#7FD856]">
+                    <Award size={20} />
                   </div>
                   <div>
                     <h4 className="font-bold text-white mb-1">Excellence</h4>
-                    <p className="text-sm text-gray-400">Certified in Modern Dental Technologies</p>
+                    <p className="text-sm text-gray-400">Modern equipment and evidence-based treatment standards</p>
                   </div>
                </div>
 
-               <div className="flex items-start gap-4 p-4 rounded-xl bg-zinc-800/30 border border-zinc-800 hover:border-[#7FD856]/30 transition-colors sm:col-span-2">
-                  <div className="p-2 bg-[#7FD856]/10 rounded-lg text-[#7FD856]">
-                    <HeartHandshake size={24} />
+               <div className="flex items-start gap-3 rounded-xl border border-zinc-800 bg-zinc-800/30 p-4 transition-colors hover:border-[#7FD856]/30 sm:col-span-2 sm:gap-4">
+                  <div className="rounded-lg bg-[#7FD856]/10 p-2 text-[#7FD856]">
+                    <HeartHandshake size={20} />
                   </div>
                   <div>
                     <h4 className="font-bold text-white mb-1">Philosophy</h4>

@@ -7,4 +7,4 @@ RUN mkdir -p data
 ENV NODE_ENV=production
 ENV PORT=8000
 EXPOSE 8000
-CMD [" node\,\server/index.js\]
+CMD ["node", "server/index.js"]

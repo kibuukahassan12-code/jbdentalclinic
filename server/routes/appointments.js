@@ -11,6 +11,7 @@ import {
   createPatient,
 } from '../db.js';
 import { validateAppointmentBody } from '../middleware/validate.js';
+import { writeAuditLog } from '../lib/audit.js';
 
 const router = Router();
 
@@ -102,7 +103,15 @@ router.post('/', validateAppointmentBody, async (req, res) => {
       }
     }
 
-    res.status(201).json(getAppointmentById(id));
+    const createdAppointment = getAppointmentById(id);
+    writeAuditLog(req, {
+      action: 'CREATE',
+      entity_type: 'appointment',
+      entity_id: id,
+      new_values: createdAppointment,
+    });
+
+    res.status(201).json(createdAppointment);
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -118,6 +127,13 @@ router.put('/:id', validateAppointmentBody, (req, res) => {
     if (!existing) return res.status(404).json({ error: 'Appointment not found' });
     updateAppointment(id, req.validated);
     const row = getAppointmentById(id);
+    writeAuditLog(req, {
+      action: 'UPDATE',
+      entity_type: 'appointment',
+      entity_id: id,
+      old_values: existing,
+      new_values: row,
+    });
     res.json(row);
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -133,6 +149,12 @@ router.delete('/:id', (req, res) => {
     const existing = getAppointmentById(id);
     if (!existing) return res.status(404).json({ error: 'Appointment not found' });
     deleteAppointment(id);
+    writeAuditLog(req, {
+      action: 'DELETE',
+      entity_type: 'appointment',
+      entity_id: id,
+      old_values: existing,
+    });
     res.status(204).send();
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -167,6 +189,14 @@ router.patch('/:id/status', (req, res) => {
       SET status = ?, updated_at = datetime('now') 
       WHERE id = ?
     `).run(status, id);
+
+    writeAuditLog(req, {
+      action: 'UPDATE',
+      entity_type: 'appointment',
+      entity_id: id,
+      old_values: { status: existing.status },
+      new_values: { status },
+    });
 
     res.json({ success: true, id, status });
   } catch (e) {

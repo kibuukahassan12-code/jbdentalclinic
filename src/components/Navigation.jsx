@@ -4,6 +4,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
+import { CLINIC } from '@/lib/clinic-branding';
 
 const Navigation = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -27,37 +28,47 @@ const Navigation = () => {
     { name: 'Admin', path: '/admin' },
   ];
 
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [location.pathname]);
+
   if (location.pathname.startsWith('/admin')) return null;
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-      isScrolled ? 'bg-[#0F0F0F]/95 backdrop-blur-md shadow-lg' : 'bg-transparent'
-    }`}>
+    <motion.nav
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, delay: 0.95 }}
+      className={`fixed left-0 right-0 z-50 transition-all duration-300 ${
+        isScrolled 
+          ? 'top-0 bg-[#0F0F0F]/95 backdrop-blur-md shadow-lg' 
+          : 'top-3 sm:top-4 lg:top-5 bg-transparent'
+      }`}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
             <img 
-              src="https://horizons-cdn.hostinger.com/389eff78-3123-445d-bf00-9ef97ab253ec/f51b96d62e1c9d03d4878cf068f6e99e.png" 
+              src={CLINIC.logoUrl}
               alt="JB Dental Clinic Logo" 
               className="h-16 w-auto object-contain"
             />
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex items-center bg-white/[0.03] border border-white/10 backdrop-blur-md rounded-full px-5 py-2.5 space-x-1.5 shadow-xl">
             {navItems.map((item) => (
               <Link
                 key={item.path}
                 to={item.path}
-                className={`text-sm font-medium transition-colors duration-300 relative group ${
-                  location.pathname === item.path ? 'text-[#7FD856]' : 'text-white hover:text-[#7FD856]'
+                className={`text-xs font-semibold px-4 py-2 rounded-full transition-all duration-300 ${
+                  location.pathname === item.path 
+                    ? 'bg-[#7FD856] text-black shadow-md shadow-[#7FD856]/15' 
+                    : 'text-white/80 hover:text-white hover:bg-white/10'
                 }`}
               >
                 {item.name}
-                <span className={`absolute -bottom-1 left-0 w-0 h-0.5 bg-[#7FD856] transition-all duration-300 group-hover:w-full ${
-                  location.pathname === item.path ? 'w-full' : ''
-                }`}></span>
               </Link>
             ))}
           </div>
@@ -69,7 +80,7 @@ const Navigation = () => {
               target="_blank"
               rel="noopener noreferrer"
             >
-              <Button className="bg-[#7FD856] text-black hover:bg-[#6FC745] font-semibold transition-all duration-300 hover:scale-105">
+              <Button className="bg-[#7FD856] text-black hover:bg-[#6FC745] font-bold transition-all duration-300 hover:scale-105 rounded-full px-6 py-2.5 text-xs">
                 Book Appointment
               </Button>
             </a>
@@ -77,8 +88,11 @@ const Navigation = () => {
 
           {/* Mobile Menu Button */}
           <button
+            type="button"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             className="md:hidden text-white hover:text-[#7FD856] transition-colors"
+            aria-label={isMobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+            aria-expanded={isMobileMenuOpen}
           >
             {isMobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
           </button>
@@ -123,7 +137,7 @@ const Navigation = () => {
           </motion.div>
         )}
       </AnimatePresence>
-    </nav>
+    </motion.nav>
   );
 };
 

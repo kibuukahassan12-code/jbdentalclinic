@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, X, User, Calendar, FileText, Activity, Users, ArrowRight, Clock, Phone, Loader2 } from 'lucide-react';
 
@@ -79,6 +79,18 @@ export default function GlobalSearch({ api, getStoredKey, onResultSelect }) {
       ...results.invoices,
       ...results.treatments,
     ];
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setSelectedIndex((prev) => Math.min(prev + 1, allResults.length - 1));
+      return;
+    }
+
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setSelectedIndex((prev) => Math.max(prev - 1, 0));
+      return;
+    }
 
     if (e.key === 'Enter') {
       e.preventDefault();

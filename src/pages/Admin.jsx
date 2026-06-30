@@ -1,5 +1,5 @@
-import React, { useState, useEffect, lazy, Suspense } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, lazy, Suspense, useMemo, useState } from 'react';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { motion } from 'framer-motion';
 import { LayoutDashboard, Calendar, Users, UserCog, LogOut, Stethoscope, ClipboardList, Activity, FileText, Package, BarChart3, FileCheck, Scale, CreditCard, Settings, Bell, Shield, History } from 'lucide-react';
@@ -23,35 +23,14 @@ const AdminUsers = lazy(() => import('@/pages/admin/AdminUsers'));
 const AdminAuditLog = lazy(() => import('@/pages/admin/AdminAuditLog'));
 import GlobalSearch from '@/components/admin/GlobalSearch';
 import { ThemeProvider, ThemeToggle } from '@/components/admin/ThemeProvider';
+import { createAdminApi, getStoredAdminKey, loginAdmin, setStoredAdminKey } from '@/lib/adminApi';
+import { CLINIC } from '@/lib/clinic-branding';
 
 const AdminTabLoader = () => (
   <div className="flex items-center justify-center py-20">
     <div className="w-8 h-8 border-4 border-[#7FD856] border-t-transparent rounded-full animate-spin" />
   </div>
 );
-
-const API_BASE = import.meta.env.VITE_API_URL || '';
-const API_KEY_STORAGE = 'jb_admin_api_key';
-
-function getStoredKey() {
-  try {
-    return sessionStorage.getItem(API_KEY_STORAGE) || '';
-  } catch {
-    return '';
-  }
-}
-
-function api(url, options = {}, apiKey) {
-  const key = apiKey ?? getStoredKey();
-  return fetch(`${API_BASE}${url}`, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      'X-Api-Key': key,
-      ...options.headers,
-    },
-  });
-}
 
 const TABS = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -72,6 +51,28 @@ const TABS = [
   { id: 'users', label: 'Users', icon: Shield },
   { id: 'audit', label: 'Audit Log', icon: History },
 ];
+
+const TAB_IDS = new Set(TABS.map((tab) => tab.id));
+
+const TAB_COMPONENTS = {
+  dashboard: AdminDashboard,
+  appointments: AdminAppointments,
+  patients: AdminPatients,
+  staff: AdminStaff,
+  treatments: AdminTreatments,
+  'treatment-plans': AdminTreatmentPlans,
+  'dental-chart': AdminDentalChart,
+  invoices: AdminInvoices,
+  'patient-reports': AdminPatientReports,
+  payments: AdminPayments,
+  inventory: AdminInventory,
+  finances: AdminFinances,
+  reports: AdminReports,
+  reminders: AdminReminders,
+  settings: AdminSettings,
+  users: AdminUsers,
+  audit: AdminAuditLog,
+};
 
 const LoginForm = ({ error, loading, onLogin }) => {
   const [email, setEmail] = useState('');
@@ -109,7 +110,7 @@ const LoginForm = ({ error, loading, onLogin }) => {
             </div>
 
             {error && (
-              <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20">
+              <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20" role="alert" aria-live="polite">
                 <p className="text-sm text-red-400">{error}</p>
               </div>
             )}
@@ -129,6 +130,7 @@ const LoginForm = ({ error, loading, onLogin }) => {
                   autoFocus
                   className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#7FD856]/50 focus:border-[#7FD856]/50 transition-colors"
                 />
+                <p className="mt-1 text-xs text-gray-500">Use your admin/staff email address.</p>
               </div>
 
               <div>
@@ -192,62 +194,105 @@ const Admin = () => {
 };
 
 const AdminContent = () => {
-  const [apiKey, setApiKey] = useState(getStoredKey());
+  const navigate = useNavigate();
+  const location = useLocation();
+  const params = useParams();
+  const initialTab = TAB_IDS.has(params.tab) ? params.tab : 'dashboard';
+  const [apiKey, setApiKey] = useState(getStoredAdminKey());
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const activeTab = TAB_IDS.has(params.tab) ? params.tab : 'dashboard';
+
+  const handleLogout = useMemo(() => () => {
+    setStoredAdminKey('');
+    setApiKey('');
+    setError('');
+    navigate('/admin/login', { replace: true });
+  }, [navigate]);
+
+  const api = useMemo(
+    () =>
+      createAdminApi(
+        () => apiKey || getStoredAdminKey(),
+        () => {
+          handleLogout();
+        }
+      ),
+    [apiKey, handleLogout]
+  );
 
   const handleNavigate = (tabId) => {
-    setActiveTab(tabId);
+    if (!TAB_IDS.has(tabId)) return;
+    navigate(`/admin/${tabId}`);
+  };
+
+  const handleSearchSelect = (result) => {
+    const routeByType = {
+      patient: 'patients',
+      appointment: 'appointments',
+      staff: 'staff',
+      invoice: 'invoices',
+      treatment: 'treatments',
+    };
+    const tabId = routeByType[result.type];
+    if (tabId) {
+      handleNavigate(tabId);
+    }
   };
 
   const handleLogin = async (email, password) => {
     setError('');
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/api/admin/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        setError(data.error || 'Login failed');
+      const { response, data } = await loginAdmin(email, password);
+      if (!response.ok) {
+        if (response.status === 401) {
+          setError('Invalid email or password. Please try again.');
+        } else if (response.status === 403) {
+          setError('Your account is not allowed to access the admin panel.');
+        } else if (response.status === 429) {
+          setError('Too many login attempts. Please wait a moment and try again.');
+        } else {
+          setError(data.error || 'Unable to sign in right now. Please try again.');
+        }
         return false;
       }
       const token = data.token || data.apiKey;
       if (data.success && token) {
-        sessionStorage.setItem(API_KEY_STORAGE, token);
+        setStoredAdminKey(token);
         setApiKey(token);
         setError('');
+        navigate(`/admin/${initialTab}`, { replace: true });
         return true;
       } else {
         setError(data.error || 'Invalid response from server');
         return false;
       }
     } catch (err) {
-      setError(err.message || 'Connection error');
+      setError('Unable to reach the server. Check your connection and try again.');
       return false;
     } finally {
       setLoading(false);
     }
   };
 
-  const handleLogout = () => {
-    sessionStorage.removeItem(API_KEY_STORAGE);
-    setApiKey('');
-    setError('');
-  };
-
   // Check if we already have a valid key in session
   useEffect(() => {
-    const stored = getStoredKey();
+    const stored = getStoredAdminKey();
     if (stored) setApiKey(stored);
   }, []);
+
+  useEffect(() => {
+    if (location.pathname === '/admin' || location.pathname === '/admin/') {
+      navigate('/admin/dashboard', { replace: true });
+    }
+  }, [location.pathname, navigate]);
 
   if (!apiKey) {
     return <LoginForm error={error} loading={loading} onLogin={handleLogin} />;
   }
+
+  const ActiveComponent = TAB_COMPONENTS[activeTab] || AdminDashboard;
 
   return (
     <>
@@ -262,12 +307,12 @@ const AdminContent = () => {
             <div className="flex items-center justify-between h-14">
               <Link to="/">
                 <img
-                  src="https://horizons-cdn.hostinger.com/389eff78-3123-445d-bf00-9ef97ab253ec/f51b96d62e1c9d03d4878cf068f6e99e.png"
+                  src={CLINIC.logoUrl}
                   alt="JB Dental Clinic Logo"
                   className="h-10 w-auto object-contain"
                 />
               </Link>
-              <GlobalSearch api={api} getStoredKey={getStoredKey} />
+              <GlobalSearch api={api} getStoredKey={getStoredAdminKey} onResultSelect={handleSearchSelect} />
               <ThemeToggle />
               <Button
                 onClick={handleLogout}
@@ -290,7 +335,7 @@ const AdminContent = () => {
                 <button
                   key={tab.id}
                   type="button"
-                  onClick={() => setActiveTab(tab.id)}
+                  onClick={() => handleNavigate(tab.id)}
                   className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-colors ${isActive
                     ? 'bg-[#7FD856] text-black'
                     : 'text-gray-400 hover:text-white border border-white/10 hover:border-[#7FD856]/30 hover:bg-white/5'
@@ -305,59 +350,13 @@ const AdminContent = () => {
 
           {/* Content */}
           <div className="pb-12">
-          <Suspense fallback={<AdminTabLoader />}>
-            {activeTab === 'dashboard' && (
-              <AdminDashboard api={api} getStoredKey={getStoredKey} onNavigate={handleNavigate} />
-            )}
-            {activeTab === 'appointments' && (
-              <AdminAppointments api={api} getStoredKey={getStoredKey} />
-            )}
-            {activeTab === 'patients' && (
-              <AdminPatients api={api} getStoredKey={getStoredKey} />
-            )}
-            {activeTab === 'staff' && (
-              <AdminStaff api={api} getStoredKey={getStoredKey} />
-            )}
-            {activeTab === 'treatments' && (
-              <AdminTreatments api={api} getStoredKey={getStoredKey} />
-            )}
-            {activeTab === 'treatment-plans' && (
-              <AdminTreatmentPlans api={api} getStoredKey={getStoredKey} />
-            )}
-            {activeTab === 'dental-chart' && (
-              <AdminDentalChart api={api} getStoredKey={getStoredKey} />
-            )}
-            {activeTab === 'invoices' && (
-              <AdminInvoices api={api} getStoredKey={getStoredKey} />
-            )}
-            {activeTab === 'patient-reports' && (
-              <AdminPatientReports api={api} getStoredKey={getStoredKey} />
-            )}
-            {activeTab === 'payments' && (
-              <AdminPayments api={api} getStoredKey={getStoredKey} />
-            )}
-            {activeTab === 'inventory' && (
-              <AdminInventory api={api} getStoredKey={getStoredKey} />
-            )}
-            {activeTab === 'finances' && (
-              <AdminFinances api={api} getStoredKey={getStoredKey} />
-            )}
-            {activeTab === 'reports' && (
-              <AdminReports api={api} getStoredKey={getStoredKey} />
-            )}
-            {activeTab === 'reminders' && (
-              <AdminReminders api={api} getStoredKey={getStoredKey} />
-            )}
-            {activeTab === 'settings' && (
-              <AdminSettings api={api} getStoredKey={getStoredKey} />
-            )}
-            {activeTab === 'users' && (
-              <AdminUsers api={api} getStoredKey={getStoredKey} />
-            )}
-            {activeTab === 'audit' && (
-              <AdminAuditLog api={api} getStoredKey={getStoredKey} />
-            )}
-          </Suspense>
+            <Suspense fallback={<AdminTabLoader />}>
+              <ActiveComponent
+                api={api}
+                getStoredKey={getStoredAdminKey}
+                onNavigate={handleNavigate}
+              />
+            </Suspense>
         </div>
       </div>
     </div>

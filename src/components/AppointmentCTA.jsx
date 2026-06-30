@@ -1,18 +1,19 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { CalendarCheck } from 'lucide-react';
 
 const AppointmentCTA = () => {
   return (
-    <section className="py-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+    <section className="relative overflow-hidden px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
       {/* Background Gradient */}
       <div className="absolute inset-0 bg-gradient-to-r from-zinc-900 to-black z-0"></div>
       <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5 z-0"></div>
       <div className="absolute right-0 top-0 w-1/2 h-full bg-gradient-to-l from-[#7FD856]/10 to-transparent z-0"></div>
 
       <div className="max-w-7xl mx-auto relative z-10">
-        <div className="flex flex-col lg:flex-row items-center justify-between gap-12">
+        <div className="flex flex-col items-center justify-between gap-10 sm:gap-12 lg:flex-row">
           
           <div className="flex-1 text-center lg:text-left">
              <motion.h2 
@@ -20,7 +21,7 @@ const AppointmentCTA = () => {
                whileInView={{ opacity: 1, x: 0 }}
                viewport={{ once: true }}
                transition={{ duration: 0.6 }}
-               className="text-4xl md:text-5xl font-bold text-white mb-6"
+               className="mb-5 text-3xl font-bold text-white sm:mb-6 md:text-5xl"
                style={{ fontFamily: "'Poppins', sans-serif" }}
              >
                Ready to Transform <br/>
@@ -32,7 +33,7 @@ const AppointmentCTA = () => {
                whileInView={{ opacity: 1, x: 0 }}
                viewport={{ once: true }}
                transition={{ duration: 0.6, delay: 0.1 }}
-               className="text-gray-300 text-lg mb-8 max-w-2xl mx-auto lg:mx-0"
+               className="mx-auto mb-8 max-w-2xl text-base text-gray-300 sm:text-lg lg:mx-0"
              >
                Don't wait for dental problems to worsen. Schedule your visit today and experience the JB Dental difference. New patients are always welcome!
              </motion.p>
@@ -42,17 +43,26 @@ const AppointmentCTA = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: 0.2 }}
+                className="flex w-full flex-col items-stretch justify-center gap-3 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center lg:justify-start"
              >
                 <a
                   href="https://wa.me/256752001269?text=Hey%20Doctor,%20I%20need%20to%20inquire..."
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <Button className="bg-[#7FD856] text-black hover:bg-[#6ed344] font-bold py-8 px-10 text-xl rounded-full shadow-lg shadow-[#7FD856]/20 transition-all hover:scale-105">
+                  <Button className="w-full rounded-full bg-[#7FD856] px-8 py-6 text-base font-bold text-black shadow-lg shadow-[#7FD856]/20 transition-all hover:scale-105 hover:bg-[#6ed344] sm:w-auto sm:px-10 sm:py-8 sm:text-xl">
                     <CalendarCheck className="mr-3" size={28}/>
                     Book Your Appointment
                   </Button>
                 </a>
+                <Link to="/services">
+                  <Button
+                    variant="outline"
+                    className="w-full border-white/20 px-8 py-5 text-base font-semibold text-white hover:bg-white hover:text-black sm:w-auto sm:py-6 sm:text-lg"
+                  >
+                    Explore Services
+                  </Button>
+                </Link>
              </motion.div>
           </div>
 

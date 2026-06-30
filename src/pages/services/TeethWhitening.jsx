@@ -10,13 +10,13 @@ const TeethWhitening = () => {
       description="Professional-grade whitening treatments that safely remove deep stains and discoloration, brightening your smile by several shades in just one visit. Safe, effective, and instant results."
       images={[
         {
-          src: "https://horizons-cdn.hostinger.com/389eff78-3123-445d-bf00-9ef97ab253ec/ff5644f5472a53e867dba2ace9f47099.jpg",
-          alt: "Portrait of a woman with a bright white smile and confident expression, showcasing the results of professional teeth whitening."
+          src: '/images/teeth-whitening.png',
+          alt: 'Patient smiling with bright white teeth during a professional dental examination at JB Dental Clinic',
         },
         {
-          src: "https://horizons-cdn.hostinger.com/389eff78-3123-445d-bf00-9ef97ab253ec/cfcd38d074ea775e1119e56eb78cc83c.jpg",
-          alt: "Close-up view of a radiant smile showing healthy, whitened teeth and gums, demonstrating professional dental aesthetic results."
-        }
+          src: '/images/teeth-whitening.png',
+          alt: 'Close-up of a healthy, whitened smile during a teeth whitening consultation at JB Dental Clinic',
+        },
       ]}
       procedure={[
         { title: "Shade Assessment", desc: "Recording your current tooth shade to measure progress." },

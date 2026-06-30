@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Scale, Plus, Trash2, TrendingUp, TrendingDown, DollarSign, Calendar, BookOpen, ArrowUpRight, ArrowDownRight, Download, X, Banknote, Smartphone, Building2, CreditCard, BarChart3, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { generateReportPdf, generateReceiptPdf } from '@/lib/pdf-generator';
+import ConfirmDialog from '@/components/admin/ConfirmDialog';
 
 const fmt = (n) => Number(n || 0).toLocaleString();
 const EXPENSE_CATEGORIES = ['General', 'Rent', 'Utilities', 'Salaries', 'Supplies', 'Equipment', 'Marketing', 'Maintenance', 'Transport', 'Other'];
@@ -36,6 +37,8 @@ export default function AdminFinances({ api, getStoredKey }) {
     const [payError, setPayError] = useState('');
     const [payFilter, setPayFilter] = useState('');
     const [payMethodFilter, setPayMethodFilter] = useState('');
+    const [expenseToDelete, setExpenseToDelete] = useState(null);
+    const [paymentToDelete, setPaymentToDelete] = useState(null);
 
     const loadProfitLoss = useCallback(async () => {
         setPlLoading(true);
@@ -95,10 +98,12 @@ export default function AdminFinances({ api, getStoredKey }) {
     };
 
     const handleDeleteExpense = async (id) => {
-        if (!window.confirm('Delete this expense?')) return;
         try {
             const res = await api(`/api/reports/expenses/${id}`, { method: 'DELETE' });
-            if (res.ok) await refreshAll();
+            if (res.ok) {
+                setExpenseToDelete(null);
+                await refreshAll();
+            }
         } catch (_) {}
     };
 
@@ -151,10 +156,12 @@ export default function AdminFinances({ api, getStoredKey }) {
     };
 
     const handlePayDelete = async (id) => {
-        if (!window.confirm('Delete this payment record?')) return;
         try {
             const res = await api(`/api/payments/${id}`, { method: 'DELETE' });
-            if (res.ok) await refreshAll();
+            if (res.ok) {
+                setPaymentToDelete(null);
+                await refreshAll();
+            }
         } catch (_) {}
     };
 
@@ -228,6 +235,22 @@ export default function AdminFinances({ api, getStoredKey }) {
 
     return (
         <div className="space-y-6">
+            <ConfirmDialog
+                open={Boolean(expenseToDelete)}
+                title="Delete expense record?"
+                description="This permanently removes the selected expense from the finance records."
+                confirmLabel="Delete expense"
+                onConfirm={() => expenseToDelete && handleDeleteExpense(expenseToDelete)}
+                onCancel={() => setExpenseToDelete(null)}
+            />
+            <ConfirmDialog
+                open={Boolean(paymentToDelete)}
+                title="Delete payment record?"
+                description="This permanently removes the selected payment and affects invoice balances."
+                confirmLabel="Delete payment"
+                onConfirm={() => paymentToDelete && handlePayDelete(paymentToDelete)}
+                onCancel={() => setPaymentToDelete(null)}
+            />
             {/* Date Range + Record Expense — always visible */}
             <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
                 <div className="flex items-center gap-2 flex-wrap">
@@ -449,7 +472,7 @@ export default function AdminFinances({ api, getStoredKey }) {
                                                         className="p-2 rounded-lg hover:bg-[#7FD856]/10 text-gray-600 hover:text-[#7FD856]" title="Download Receipt">
                                                         <Download size={15} />
                                                     </button>
-                                                    <button onClick={() => handlePayDelete(pay.id)}
+                                                    <button onClick={() => setPaymentToDelete(pay.id)}
                                                         className="p-2 rounded-lg hover:bg-red-500/10 text-gray-600 hover:text-red-400" title="Delete">
                                                         <Trash2 size={15} />
                                                     </button>
@@ -760,7 +783,7 @@ export default function AdminFinances({ api, getStoredKey }) {
                                         </div>
                                         <div className="flex items-center gap-3">
                                             <span className="text-red-400 font-bold text-sm whitespace-nowrap">-UGX {fmt(exp.amount)}</span>
-                                            <button onClick={() => handleDeleteExpense(exp.id)}
+                                            <button onClick={() => setExpenseToDelete(exp.id)}
                                                 className="p-2 rounded-lg hover:bg-red-500/10 text-gray-600 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all" title="Delete">
                                                 <Trash2 size={15} />
                                             </button>

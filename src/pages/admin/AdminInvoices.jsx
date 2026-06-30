@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { FileText, Plus, Edit2, Trash2, X, Search, CreditCard, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { generateInvoicePdf } from '@/lib/pdf-generator';
+import ConfirmDialog from '@/components/admin/ConfirmDialog';
 
 const STATUS_COLORS = {
   Pending: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
@@ -27,6 +28,7 @@ export default function AdminInvoices({ api, getStoredKey }) {
   const [form, setForm] = useState({ patient_id: '', total_amount: '', discount: '0', tax: '0', status: 'Pending' });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [invoiceToDelete, setInvoiceToDelete] = useState(null);
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -95,13 +97,15 @@ export default function AdminInvoices({ api, getStoredKey }) {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Delete this invoice?')) return;
     try {
       const res = await api(`/api/invoices/${id}`, { method: 'DELETE' });
-      if (res.ok) await loadData();
+      if (res.ok) {
+        setInvoiceToDelete(null);
+        await loadData();
+      }
       else {
         const data = await res.json().catch(() => ({}));
-        alert(data.error || 'Delete failed');
+        setError(data.error || 'Delete failed');
       }
     } catch (_) {}
   };
@@ -138,6 +142,14 @@ export default function AdminInvoices({ api, getStoredKey }) {
 
   return (
     <div className="space-y-6">
+      <ConfirmDialog
+        open={Boolean(invoiceToDelete)}
+        title="Delete invoice?"
+        description="This permanently removes the selected invoice. Linked payments must already be removed."
+        confirmLabel="Delete invoice"
+        onConfirm={() => invoiceToDelete && handleDelete(invoiceToDelete)}
+        onCancel={() => setInvoiceToDelete(null)}
+      />
       {/* Summary cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="rounded-xl bg-white/5 border border-white/10 p-5">
@@ -180,6 +192,8 @@ export default function AdminInvoices({ api, getStoredKey }) {
           <Plus size={16} className="mr-1" /> New Invoice
         </Button>
       </div>
+
+      {error && <p className="text-red-400 text-sm p-3 bg-red-500/10 rounded-lg">{error}</p>}
 
       {/* Modal Form */}
       {showForm && (
@@ -264,7 +278,7 @@ export default function AdminInvoices({ api, getStoredKey }) {
                     <button onClick={() => openEdit(inv)} className="p-2 rounded-lg hover:bg-white/10 text-gray-400 hover:text-white" title="Edit">
                       <Edit2 size={15} />
                     </button>
-                    <button onClick={() => handleDelete(inv.id)} className="p-2 rounded-lg hover:bg-red-500/10 text-gray-400 hover:text-red-400" title="Delete">
+                    <button onClick={() => setInvoiceToDelete(inv.id)} className="p-2 rounded-lg hover:bg-red-500/10 text-gray-400 hover:text-red-400" title="Delete">
                       <Trash2 size={15} />
                     </button>
                   </div>

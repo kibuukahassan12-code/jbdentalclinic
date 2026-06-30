@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Loader2, ImageOff } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 const LazyImage = ({ 
   src, 
@@ -13,15 +13,35 @@ const LazyImage = ({
   height,
   objectPosition = 'center',
   objectFit = 'cover',
-  placeholderColor = 'bg-zinc-800' 
+  placeholderColor = 'bg-zinc-800',
+  loading = 'lazy',
+  fetchPriority = 'auto',
 }) => {
+  const FALLBACK_IMAGE = '/images/hero-carousel-2.png';
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
-  const [isVisible, setIsVisible] = useState(false);
+  const [isVisible, setIsVisible] = useState(loading === 'eager');
+  const [resolvedSrc, setResolvedSrc] = useState(src);
   const imgRef = useRef(null);
   const containerRef = useRef(null);
 
   useEffect(() => {
+    setResolvedSrc(src);
+    setIsLoaded(false);
+    setHasError(false);
+  }, [src]);
+
+  useEffect(() => {
+    if (loading === 'eager') {
+      setIsVisible(true);
+      return undefined;
+    }
+
+    if (typeof IntersectionObserver === 'undefined') {
+      setIsVisible(true);
+      return undefined;
+    }
+
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting) {
@@ -35,22 +55,32 @@ const LazyImage = ({
       }
     );
 
-    if (containerRef.current) {
-      observer.observe(containerRef.current);
+    const observedNode = containerRef.current;
+    if (observedNode) {
+      observer.observe(observedNode);
     }
 
     return () => {
-      if (containerRef.current) {
-        observer.unobserve(containerRef.current);
+      if (observedNode) {
+        observer.unobserve(observedNode);
       }
     };
-  }, []);
+  }, [loading]);
 
-  const handleLoad = () => setIsLoaded(true);
+  const handleLoad = () => {
+    setIsLoaded(true);
+    setHasError(false);
+  };
   const handleError = () => {
-    setIsLoaded(true); // Stop loading spinner
+    // Seamlessly recover by switching to a stable local fallback image.
+    if (resolvedSrc !== FALLBACK_IMAGE) {
+      setResolvedSrc(FALLBACK_IMAGE);
+      setHasError(false);
+      setIsLoaded(false);
+      return;
+    }
+    setIsLoaded(true);
     setHasError(true);
-    console.warn(`Failed to load image: ${src}`);
   };
 
   return (
@@ -65,17 +95,12 @@ const LazyImage = ({
         </div>
       )}
       
-      {hasError && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-500 z-10 p-4 text-center bg-zinc-800">
-          <ImageOff className="w-8 h-8 mb-2 opacity-50" />
-          <span className="text-xs">Image unavailable</span>
-        </div>
-      )}
+      {hasError && <div className="absolute inset-0 z-10 bg-zinc-800" />}
 
       {isVisible && (
         <img
           ref={imgRef}
-          src={src}
+          src={resolvedSrc}
           srcSet={srcSet}
           sizes={sizes}
           alt={alt}
@@ -85,7 +110,8 @@ const LazyImage = ({
           onError={handleError}
           className={`w-full h-full transition-opacity duration-500 ease-in-out ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
           style={{ objectPosition, objectFit }}
-          loading="lazy"
+          loading={loading}
+          fetchPriority={fetchPriority}
           decoding="async"
         />
       )}

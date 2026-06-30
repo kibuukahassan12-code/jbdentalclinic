@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Settings, Building2, Mail, Phone, MapPin, Clock, DollarSign, Percent, Globe, Bell, CreditCard, Save, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
+import ConfirmDialog from '@/components/admin/ConfirmDialog';
 
 const SETTING_GROUPS = [
   {
@@ -77,6 +78,7 @@ export default function AdminSettings({ api, getStoredKey }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [activeGroup, setActiveGroup] = useState('clinic');
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
   const { toast } = useToast();
 
   const loadSettings = useCallback(async () => {
@@ -134,14 +136,13 @@ export default function AdminSettings({ api, getStoredKey }) {
   };
 
   const handleReset = () => {
-    if (confirm('Reset all settings to defaults? This cannot be undone.')) {
-      setSettings(DEFAULT_SETTINGS);
-      toast({
-        title: 'Settings Reset',
-        description: 'All settings have been reset to defaults. Click Save to apply.',
-        variant: 'default',
-      });
-    }
+    setSettings(DEFAULT_SETTINGS);
+    setShowResetConfirm(false);
+    toast({
+      title: 'Settings Reset',
+      description: 'All settings have been reset to defaults. Click Save to apply.',
+      variant: 'default',
+    });
   };
 
   const renderField = (field) => {
@@ -232,6 +233,14 @@ export default function AdminSettings({ api, getStoredKey }) {
 
   return (
     <div className="space-y-6">
+      <ConfirmDialog
+        open={showResetConfirm}
+        title="Reset settings to defaults?"
+        description="This will replace the current form values with the default clinic settings. Click Save Changes to persist them."
+        confirmLabel="Reset settings"
+        onConfirm={handleReset}
+        onCancel={() => setShowResetConfirm(false)}
+      />
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h2 className="text-xl font-semibold text-white flex items-center gap-2">
@@ -243,7 +252,7 @@ export default function AdminSettings({ api, getStoredKey }) {
         <div className="flex gap-2">
           <Button
             variant="outline"
-            onClick={handleReset}
+            onClick={() => setShowResetConfirm(true)}
             className="bg-transparent border-white/20 text-gray-300 hover:bg-white/5 hover:text-white"
           >
             <RotateCcw size={16} className="mr-2" />

@@ -28,11 +28,13 @@ export default function ReceiptPrint({ payment, invoice, patient, onClose, autoP
     <div className="bg-white text-black p-8 max-w-xl mx-auto font-sans print:p-4 print:max-w-none">
       {/* Header with Clinic Branding - Centered */}
       <div className="text-center border-b-2 border-[#7FD856] pb-6 mb-8">
-        <img
-          src={CLINIC.logoUrl}
-          alt={CLINIC.name}
-          className="h-16 w-auto object-contain mx-auto mb-3"
-        />
+        <div className="bg-[#0F0F0F] inline-block p-2 rounded-lg mb-3">
+          <img
+            src={CLINIC.logoUrl}
+            alt={CLINIC.name}
+            className="h-12 w-auto object-contain mx-auto"
+          />
+        </div>
         <h1 className="text-2xl font-bold text-[#0F0F0F] mb-1">{CLINIC.name}</h1>
         <p className="text-sm text-gray-700 font-medium">{CLINIC.tagline}</p>
         <p className="text-xs text-gray-600 mt-3">{CLINIC.address}</p>

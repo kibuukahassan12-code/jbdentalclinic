@@ -30,7 +30,7 @@ const Services = () => {
       slug: 'bridal-dentistry',
       description: 'The ONLY clinic offering exclusive bridal dentistry services. Custom-tailored packages to ensure your smile is picture-perfect for your special day.',
       icon: HeartHandshake,
-      image: 'https://horizons-cdn.hostinger.com/389eff78-3123-445d-bf00-9ef97ab253ec/776bfc0dcf24115ca9ed882db6e0cb8a.jpg', // Updated image URL for Bridal Dentistry
+      image: '/images/bridal-dentistry.jpg',
       isExclusive: true
     },
     {
@@ -38,84 +38,84 @@ const Services = () => {
       slug: 'general-dentistry',
       description: 'Comprehensive oral health maintenance including routine examinations, cleanings, and preventative strategies to ensure your smile lasts a lifetime.',
       icon: Stethoscope,
-      image: 'https://horizons-cdn.hostinger.com/389eff78-3123-445d-bf00-9ef97ab253ec/d102fd6bad055a03990b7acf8334d4d8.jpg',
+      image: '/images/general-dentistry.jpg',
     },
     {
       title: 'Cosmetic Dentistry',
       slug: 'cosmetic-dentistry',
       description: 'Artistic restoration of your smile using veneers, bonding, and aesthetic contouring designed to enhance your natural beauty and confidence.',
       icon: Sparkles,
-      image: 'https://horizons-cdn.hostinger.com/389eff78-3123-445d-bf00-9ef97ab253ec/bab1fc185cee524fbf9689bb7b5e1465.jpg', // Updated image URL for Cosmetic Dentistry
+      image: '/images/cosmetic-dentistry.jpg',
     },
     {
       title: 'Orthodontics',
       slug: 'orthodontics',
       description: 'Straighten teeth and correct bite issues with modern solutions ranging from traditional braces to clear aligners for both adults and children.',
       icon: Smile,
-      image: 'https://horizons-cdn.hostinger.com/389eff78-3123-445d-bf00-9ef97ab253ec/d935e4efcee7619465be9fdf57a3e54c.jpg',
+      image: '/images/orthodontics.jpg',
     },
     {
       title: 'Dental Implants',
       slug: 'dental-implants',
       description: 'State-of-the-art replacement for missing teeth. Our titanium implants provide a strong, long-lasting foundation specifically designed to match your natural teeth.',
       icon: Anchor,
-      image: 'https://horizons-cdn.hostinger.com/389eff78-3123-445d-bf00-9ef97ab253ec/60e7d33b5b6f3de6d08cf3967051ea02.jpg',
+      image: '/images/dental-implants.jpg',
     },
     {
       title: 'Teeth Whitening',
       slug: 'teeth-whitening',
       description: 'Professional-grade whitening treatments that safely remove deep stains and discoloration, brightening your smile by several shades in just one visit.',
       icon: Zap,
-      image: 'https://horizons-cdn.hostinger.com/389eff78-3123-445d-bf00-9ef97ab253ec/db4daef523c8a222afb810753db60b03.jpg',
+      image: '/images/teeth-whitening.png',
     },
     {
       title: 'Emergency Dental Care',
       slug: 'emergency-dental',
       description: 'Immediate attention for dental emergencies including severe pain, broken teeth, or trauma. We prioritize urgent cases to relieve your pain fast.',
       icon: AlertCircle,
-      image: 'https://horizons-cdn.hostinger.com/389eff78-3123-445d-bf00-9ef97ab253ec/dd30df664e56d6e8792de1271b32d0c0.jpg',
+      image: '/images/emergency-dental.png',
     },
     {
       title: 'Root Canal Treatment',
       slug: 'root-canal',
       description: 'Advanced endodontic therapy to save infected or damaged teeth. We use modern techniques to make the procedure comfortable and effective.',
       icon: Activity,
-      image: 'https://horizons-cdn.hostinger.com/389eff78-3123-445d-bf00-9ef97ab253ec/1c621aa63f1ae70f8770c5aa174dd329.jpg',
+      image: '/images/root-canal.png',
     },
     {
       title: 'Dental Bridges & Crowns',
       slug: 'dental-bridges', 
       description: 'Custom-crafted restorative solutions to repair damaged teeth or fill gaps, restoring both function and the natural appearance of your smile.',
       icon: Crown,
-      image: 'https://horizons-cdn.hostinger.com/389eff78-3123-445d-bf00-9ef97ab253ec/d102fd6bad055a03990b7acf8334d4d8.jpg',
+      image: '/images/dental-bridges-crowns.jpg',
     },
     {
       title: 'Gum Disease Treatment',
       slug: 'periodontics',
       description: 'Periodontal therapy to combat gum inflammation and disease. We help you maintain healthy gums which are the foundation of a healthy smile.',
       icon: ShieldPlus,
-      image: 'https://horizons-cdn.hostinger.com/389eff78-3123-445d-bf00-9ef97ab253ec/1c621aa63f1ae70f8770c5aa174dd329.jpg',
+      image: '/images/periodontics.png',
     },
     {
       title: 'Pediatric Dentistry',
       slug: 'pediatric-dentistry',
       description: 'Gentle, child-friendly dental care aimed at creating positive experiences for our youngest patients, from their first tooth to adolescence.',
       icon: Baby,
-      image: 'https://horizons-cdn.hostinger.com/389eff78-3123-445d-bf00-9ef97ab253ec/d102fd6bad055a03990b7acf8334d4d8.jpg',
+      image: '/images/pediatric-dentistry.jpg',
     },
     {
       title: 'Tooth Extraction',
       slug: 'tooth-extraction',
       description: 'Safe and gentle removal of problematic teeth when necessary. We prioritize your comfort during extractions and provide excellent aftercare.',
       icon: Search,
-      image: 'https://horizons-cdn.hostinger.com/389eff78-3123-445d-bf00-9ef97ab253ec/dd30df664e56d6e8792de1271b32d0c0.jpg',
+      image: '/images/tooth-extraction.jpg',
     },
     {
       title: 'Dental Crowns', 
       slug: 'dental-crowns',
       description: 'High-quality caps to restore broken or worn-down teeth. Our crowns are custom-made to look and feel exactly like your natural teeth.',
       icon: Component,
-      image: 'https://horizons-cdn.hostinger.com/389eff78-3123-445d-bf00-9ef97ab253ec/60e7d33b5b6f3de6d08cf3967051ea02.jpg',
+      image: '/images/dental-crowns.png',
     },
   ];
 
@@ -153,16 +153,20 @@ const Services = () => {
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="relative overflow-hidden rounded-2xl p-12 text-center"
+            className="relative overflow-hidden rounded-2xl p-12 text-center border border-[#7FD856]/20"
           >
             {/* Background Texture */}
             <div className="absolute inset-0 z-0">
-               <LazyImage 
-                 src="https://images.unsplash.com/photo-1558642843-d6351b0ccf51" 
-                 alt="Background Pattern" 
-                 className="w-full h-full opacity-10"
-               />
-               <div className="absolute inset-0 bg-gradient-to-r from-[#0F0F0F] via-[#7FD856]/10 to-[#0F0F0F] pointer-events-none" />
+              <LazyImage
+                src="/images/cta-dental-bg.png"
+                alt="Dental clinic treatment background"
+                className="w-full h-full"
+                objectFit="cover"
+                objectPosition="center"
+              />
+              <div className="absolute inset-0 bg-[#0B0F0B]/40 pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-r from-[#0F0F0F]/55 via-[#16311A]/25 to-[#0F0F0F]/55 pointer-events-none" />
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(127,216,86,0.10),transparent_65%)] pointer-events-none" />
             </div>
 
             <div className="relative z-10">

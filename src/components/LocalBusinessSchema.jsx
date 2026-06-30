@@ -45,7 +45,7 @@ const localBusinessSchema = {
     },
   ],
   priceRange: '$$',
-  image: 'https://horizons-cdn.hostinger.com/389eff78-3123-445d-bf00-9ef97ab253ec/f51b96d62e1c9d03d4878cf068f6e99e.png',
+  image: `${SITE_URL}/images/jb-dental-logo.png`,
   sameAs: [],
 };
 

@@ -10,8 +10,8 @@ const Orthodontics = () => {
       description="Straighten teeth and correct bite issues with modern solutions ranging from traditional braces to clear aligners for both adults and children. A straight smile is a healthier smile."
       images={[
         {
-          src: "https://horizons-cdn.hostinger.com/389eff78-3123-445d-bf00-9ef97ab253ec/91f323932a88513413921b71c5ec7113.png",
-          alt: "A young child in a red shirt smiling brightly while a dentist in blue protective gear examines the child's teeth. The child has colorful hair clips and is sitting in a turquoise dental chair.",
+          src: "/images/orthodontics.jpg",
+          alt: "Doctor and patient reviewing dental scan at JB Dental Clinic orthodontics consultation",
           objectPosition: "center"
         },
         {

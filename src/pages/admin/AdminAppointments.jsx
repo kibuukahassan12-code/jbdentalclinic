@@ -6,7 +6,9 @@ import { useToast } from '@/components/ui/use-toast';
 import SectionHeader from '@/components/SectionHeader';
 import ReceiptPrint from '@/components/admin/ReceiptPrint';
 import AppointmentInvoice from '@/components/admin/AppointmentInvoice';
+import ConfirmDialog from '@/components/admin/ConfirmDialog';
 import html2pdf from 'html2pdf.js';
+import { CLINIC } from '@/lib/clinic-branding';
 
 const today = () => new Date().toISOString().slice(0, 10);
 const in30Days = () => {
@@ -65,6 +67,7 @@ export default function AdminAppointments({ api, getStoredKey }) {
   const [editingId, setEditingId] = useState(null);
   const [receiptData, setReceiptData] = useState(null);
   const [appointmentInvoiceData, setAppointmentInvoiceData] = useState(null);
+  const [appointmentToDelete, setAppointmentToDelete] = useState(null);
   const printRef = useRef(null);
 
   const loadList = useCallback(async () => {
@@ -121,7 +124,9 @@ export default function AdminAppointments({ api, getStoredKey }) {
     container.innerHTML = `
       <div style="padding: 20px; font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; background: white;">
         <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #7FD856; padding-bottom: 20px;">
-          <img src="https://horizons-cdn.hostinger.com/389eff78-3123-445d-bf00-9ef97ab253ec/f51b96d62e1c9d03d4878cf068f6e99e.png" alt="JB Dental Clinic" style="height: 60px; margin-bottom: 10px;">
+          <div style="background: #0F0F0F; display: inline-block; padding: 10px; border-radius: 8px; margin-bottom: 10px;">
+            <img src="${CLINIC.logoUrl}" alt="${CLINIC.name}" style="height: 50px; display: block; margin: 0 auto;">
+          </div>
           <h1 style="color: #0F0F0F; margin: 0; font-size: 24px;">JB Dental Clinic</h1>
           <p style="margin: 5px 0; color: #666;">For All Your Dental Solutions</p>
           <p style="margin: 10px 0 5px; color: #666; font-size: 12px;">Makindye, opposite Climax Bar, Kampala, Uganda</p>
@@ -187,7 +192,9 @@ export default function AdminAppointments({ api, getStoredKey }) {
     container.innerHTML = `
       <div style="padding: 20px; font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; background: white;">
         <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #7FD856; padding-bottom: 20px;">
-          <img src="https://horizons-cdn.hostinger.com/389eff78-3123-445d-bf00-9ef97ab253ec/f51b96d62e1c9d03d4878cf068f6e99e.png" alt="JB Dental Clinic" style="height: 60px; margin-bottom: 10px;">
+          <div style="background: #0F0F0F; display: inline-block; padding: 10px; border-radius: 8px; margin-bottom: 10px;">
+            <img src="${CLINIC.logoUrl}" alt="${CLINIC.name}" style="height: 50px; display: block; margin: 0 auto;">
+          </div>
           <h1 style="color: #0F0F0F; margin: 0; font-size: 24px;">JB Dental Clinic</h1>
           <p style="margin: 5px 0; color: #666;">For All Your Dental Solutions</p>
           <p style="margin: 10px 0 5px; color: #666; font-size: 12px;">Makindye, opposite Climax Bar, Kampala, Uganda</p>
@@ -399,7 +406,6 @@ export default function AdminAppointments({ api, getStoredKey }) {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Delete this appointment?')) return;
     const key = getStoredKey();
     const res = await api(`/api/appointments/${id}`, { method: 'DELETE' }, key);
     if (res.ok) {
@@ -411,12 +417,14 @@ export default function AdminAppointments({ api, getStoredKey }) {
           patient_id: '',
           appointment_date: today(),
           appointment_time: '09:00',
+          duration_minutes: '30',
           service: '',
           notes: '',
           payment_on_booking: 'none',
           amount_ugx: '',
         });
       }
+      setAppointmentToDelete(null);
       loadList();
     } else {
       const data = await res.json().catch(() => ({}));
@@ -505,6 +513,14 @@ export default function AdminAppointments({ api, getStoredKey }) {
 
   return (
     <>
+      <ConfirmDialog
+        open={Boolean(appointmentToDelete)}
+        title="Delete appointment?"
+        description="This permanently removes the selected appointment record."
+        confirmLabel="Delete appointment"
+        onConfirm={() => appointmentToDelete && handleDelete(appointmentToDelete)}
+        onCancel={() => setAppointmentToDelete(null)}
+      />
       <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
         <SectionHeader
           title="Appointments"
@@ -692,6 +708,7 @@ export default function AdminAppointments({ api, getStoredKey }) {
                     patient_id: '',
                     appointment_date: today(),
                     appointment_time: '09:00',
+                    duration_minutes: '30',
                     service: '',
                     notes: '',
                     payment_on_booking: 'none',
@@ -804,7 +821,7 @@ export default function AdminAppointments({ api, getStoredKey }) {
                       variant="outline"
                       size="sm"
                       className="border-red-500/30 text-red-400 hover:bg-red-500/10"
-                      onClick={() => handleDelete(apt.id)}
+                      onClick={() => setAppointmentToDelete(apt.id)}
                     >
                       <Trash2 size={16} />
                     </Button>

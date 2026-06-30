@@ -10,7 +10,7 @@ const DentalBridges = () => {
       description="Custom-crafted restorative solutions to repair damaged teeth or fill gaps, restoring both function and the natural appearance of your smile. Bridges bridge the gap created by one or more missing teeth."
       images={[
         {
-          src: "https://horizons-cdn.hostinger.com/389eff78-3123-445d-bf00-9ef97ab253ec/f694f62d7dc88245fdea51aceebd1aad.jpg",
+          src: "/images/dental-bridges-crowns.jpg",
           alt: "Close-up side view of a dental bridge prosthetic with high-quality ceramic finish"
         },
         {

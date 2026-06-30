@@ -10,13 +10,15 @@ const RootCanal = () => {
       description="Advanced endodontic therapy to save infected or damaged teeth. We use modern techniques to make the procedure comfortable and effective, dispelling the myth that root canals are painful."
       images={[
         {
-          src: "https://images.unsplash.com/photo-1576091160550-112173f7f869?w=800",
-          alt: "3D medical illustration showing a tooth cross-section with endodontic instruments (files) inserted into the root canal, displaying the internal anatomy of the tooth with the pulp chamber and root canal system highlighted in red and blue."
+          src: '/images/root-canal.png',
+          alt: 'Medical illustration showing root canal procedure with endodontic file cleaning infected tooth pulp at JB Dental Clinic',
+          objectPosition: 'center',
         },
         {
-          src: "https://images.unsplash.com/photo-1606811841689-23db3c3298c0?w=800",
-          alt: "3D illustration of a tooth showing the internal root canal structure with the pulp highlighted in orange/red against a blue translucent tooth outline, demonstrating the anatomy that requires root canal treatment."
-        }
+          src: '/images/root-canal.png',
+          alt: '3D visualization of molar tooth anatomy highlighting root canals treated during endodontic therapy',
+          objectPosition: 'center',
+        },
       ]}
       procedure={[
         { title: "Diagnosis & Anesthesia", desc: "Confirming infection and ensuring the area is completely numb." },

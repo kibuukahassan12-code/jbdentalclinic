@@ -10,13 +10,13 @@ const DentalImplants = () => {
       description="State-of-the-art replacement for missing teeth. Our titanium implants provide a strong, long-lasting foundation specifically designed to match your natural teeth in both function and appearance."
       images={[
         {
-          src: "https://horizons-cdn.hostinger.com/389eff78-3123-445d-bf00-9ef97ab253ec/1ba84fe64f8ab58fcdc975aae03196a1.jpg",
-          alt: "Detailed 3D medical illustration of dental implants showing white porcelain crowns at the top and a cross-section below displaying three titanium dental implants inserted into jawbone with pink gum tissue, demonstrating the complete dental implant structure and placement.",
+          src: "/images/dental-implants.jpg",
+          alt: "3D illustration of dental implants with titanium screws and porcelain crowns being placed into the jawbone",
           objectPosition: "center"
         },
         {
-          src: "https://horizons-cdn.hostinger.com/389eff78-3123-445d-bf00-9ef97ab253ec/692c5da77c244cce652ea800c8075eec.jpg",
-          alt: "3D illustration of dental implants showing white porcelain crowns on titanium implant screws with visible threading against a pink gum tissue background, demonstrating the complete implant structure and integration with natural teeth."
+          src: "/images/dental-implants.jpg",
+          alt: "Close-up 3D view showing dental implant components including crown, abutment and titanium screw"
         }
       ]}
       procedure={[

@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Users, Plus, Trash2, Edit2, X, Shield, UserCog, User, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
+import ConfirmDialog from '@/components/admin/ConfirmDialog';
 
 const ROLES = [
   { id: 'admin', label: 'Admin', description: 'Full access to all features', icon: Shield },
@@ -17,6 +18,7 @@ export default function AdminUsers({ api, getStoredKey }) {
   const [showForm, setShowForm] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const [formData, setFormData] = useState({ email: '', password: '', role: 'staff' });
+  const [userToDelete, setUserToDelete] = useState(null);
   const { toast } = useToast();
 
   const loadUsers = useCallback(async () => {
@@ -70,10 +72,10 @@ export default function AdminUsers({ api, getStoredKey }) {
   };
 
   const handleDelete = async (user) => {
-    if (!confirm(`Delete user ${user.email}? This cannot be undone.`)) return;
     try {
       const res = await api(`/api/users/${user.id}`, { method: 'DELETE' });
       if (res.ok) {
+        setUserToDelete(null);
         toast({ title: 'User Deleted', description: 'User has been removed.' });
         loadUsers();
       } else {
@@ -116,6 +118,18 @@ export default function AdminUsers({ api, getStoredKey }) {
 
   return (
     <div className="space-y-6">
+      <ConfirmDialog
+        open={Boolean(userToDelete)}
+        title="Delete user account?"
+        description={
+          userToDelete
+            ? `This will permanently delete ${userToDelete.email}. This action cannot be undone.`
+            : ''
+        }
+        confirmLabel="Delete user"
+        onConfirm={() => userToDelete && handleDelete(userToDelete)}
+        onCancel={() => setUserToDelete(null)}
+      />
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h2 className="text-xl font-semibold text-white flex items-center gap-2">
@@ -279,7 +293,7 @@ export default function AdminUsers({ api, getStoredKey }) {
                         <Edit2 size={16} />
                       </button>
                       <button
-                        onClick={() => handleDelete(user)}
+                        onClick={() => setUserToDelete(user)}
                         className="p-2 rounded-lg text-gray-400 hover:text-red-400 hover:bg-red-500/10 transition-colors"
                       >
                         <Trash2 size={16} />

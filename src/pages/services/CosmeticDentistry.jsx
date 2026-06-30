@@ -10,7 +10,7 @@ const CosmeticDentistry = () => {
       description="Artistic restoration of your smile using veneers, bonding, and aesthetic contouring designed to enhance your natural beauty and confidence. We combine art and science to create the smile you've always dreamed of."
       images={[
         {
-          src: "https://horizons-cdn.hostinger.com/389eff78-3123-445d-bf00-9ef97ab253ec/03feac7fdbbdb9e2645e5076353f627f.jpg",
+          src: "/images/cosmetic-dentistry.jpg",
           alt: "Close-up of a person's beautiful smile with bright white teeth, showing cosmetic dentistry results, with hands framing the teeth.",
           objectPosition: "center"
         },
