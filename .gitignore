@@ -17,6 +17,7 @@ build/
 *.log
 .DS_Store
 Thumbs.db
+Microsoft/
 
 # InsForge & AI agent skills
 .insforge
